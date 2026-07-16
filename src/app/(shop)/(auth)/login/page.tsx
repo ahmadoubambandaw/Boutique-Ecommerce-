@@ -1,28 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, type LoginInput } from "@/lib/validations";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
+import { loginAction, type AuthState } from "@/lib/auth/actions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-export default function LoginPage() {
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors, isSubmitting },
-  } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" size="lg" className="w-full" disabled={pending}>
+      {pending ? "Connexion…" : "Se connecter"}
+    </Button>
+  );
+}
 
-  const onSubmit = async (_data: LoginInput) => {
-    // Integration point: Shopify Customer Account API (OAuth / token exchange).
-    await new Promise((r) => setTimeout(r, 700));
-    setError("root", {
-      message:
-        "Démo : connectez l'API Customer Account de Shopify pour l'authentification réelle.",
-    });
-  };
+export default function LoginPage() {
+  const [state, formAction] = useActionState<AuthState, FormData>(loginAction, {});
 
   return (
     <div className="mx-auto flex max-w-md flex-col px-4 py-20">
@@ -31,29 +26,21 @@ export default function LoginPage() {
         Accédez à votre compte, vos commandes et vos favoris.
       </p>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4">
+      <form action={formAction} className="mt-8 space-y-4">
         <div>
           <label className="mb-1.5 block text-sm font-medium">E-mail</label>
-          <Input type="email" placeholder="vous@exemple.com" {...register("email")} />
-          {errors.email && (
-            <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
-          )}
+          <Input name="email" type="email" required placeholder="vous@exemple.com" />
         </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium">Mot de passe</label>
-          <Input type="password" placeholder="••••••••" {...register("password")} />
-          {errors.password && (
-            <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>
-          )}
+          <Input name="password" type="password" required placeholder="••••••••" />
         </div>
-        {errors.root && (
-          <p className="rounded-xl bg-[hsl(var(--muted))] px-3 py-2 text-xs">
-            {errors.root.message}
+        {state.error && (
+          <p className="rounded-xl bg-red-500/10 px-3 py-2 text-xs text-red-500">
+            {state.error}
           </p>
         )}
-        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Connexion…" : "Se connecter"}
-        </Button>
+        <SubmitButton />
       </form>
 
       <p className="mt-6 text-center text-sm text-[hsl(var(--muted-foreground))]">

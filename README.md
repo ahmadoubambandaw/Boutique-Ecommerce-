@@ -159,15 +159,36 @@ et pointez-les vers le projet ; `resolveTenant()` route par `host`.
 
 ---
 
-## 🧭 Points d'intégration à finaliser en production
+## 🧭 État des intégrations
 
-Ces zones sont câblées et documentées, prêtes à recevoir votre backend :
+### ✅ Implémenté (bloc critique)
+- **Base de données tenants** — Drizzle ORM + Postgres (`lib/db`, `lib/tenant/repository.ts`).
+  Migrations dans `drizzle/`. `resolveTenant()` route désormais par domaine via la DB.
+- **Auth client réelle** — Shopify Storefront Customer API : connexion, inscription,
+  déconnexion, compte + commandes réelles (`lib/auth`, server actions). Session via
+  cookie httpOnly.
+- **Stripe** — Checkout d'abonnement, webhooks (cycle de vie complet), Billing Portal
+  (`lib/stripe`, `api/stripe/*`). Plans mappés aux Price IDs Stripe.
+- **Persistance OAuth** — Le callback provisionne le tenant : token Storefront,
+  enregistrement des webhooks Shopify, création du client Stripe, écriture en DB
+  (`lib/tenant/provision.ts`).
 
-- **Auth client** : Shopify Customer Account API (`login`, `register`, `account`)
-- **Persistance tenants** : `lib/tenant/registry.ts`
-- **Stripe** : création d'abonnement au callback OAuth + gestion Super Admin
-- **Suivi de commande / factures** : Shopify Admin API (`track`, `account`)
-- **Newsletter / Contact** : votre ESP / helpdesk
+> Ces couches se dégradent proprement : sans `DATABASE_URL` / `STRIPE_SECRET_KEY`
+> l'app tourne en mode démo (données de démonstration) et le build reste vert.
+
+### ⏳ Reste à finaliser
+- Sécurité des routes `/admin` (auth + rôles via `admin_users`)
+- Middleware multi-domaine (`middleware.ts`)
+- Suivi de commande / factures PDF via Shopify Admin API (`track`)
+- Analytics dashboard réelles (Admin API)
+- Newsletter / Contact (ESP / helpdesk)
+
+### Mise en route base de données
+```bash
+# 1. Renseignez DATABASE_URL dans .env.local
+# 2. Appliquez le schéma
+npm run db:push        # ou db:generate + db:migrate
+```
 
 ---
 

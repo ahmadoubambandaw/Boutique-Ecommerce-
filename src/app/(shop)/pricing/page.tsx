@@ -3,6 +3,7 @@ import { Check } from "lucide-react";
 import { PLAN_LIST } from "@/lib/tenant/plans";
 import { formatPrice } from "@/lib/utils";
 import { PageHero } from "@/components/ui/page-hero";
+import { PlanCta } from "@/components/pricing/plan-cta";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -51,17 +52,7 @@ export default function PricingPage() {
                 {formatPrice(plan.priceMonthly, plan.currency)}
                 <span className="text-base font-normal opacity-70">/mois</span>
               </p>
-              <a
-                href="/api/auth/shopify"
-                className={cn(
-                  "mt-6 inline-flex h-12 items-center justify-center rounded-full px-6 text-sm font-medium transition-opacity hover:opacity-90",
-                  featured
-                    ? "bg-white text-black"
-                    : "bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))]",
-                )}
-              >
-                Commencer l'essai
-              </a>
+              <PlanCta plan={plan.id} featured={featured} />
               <ul className="mt-8 space-y-3 text-sm">
                 {plan.highlights.map((h) => (
                   <li key={h} className="flex items-start gap-2">

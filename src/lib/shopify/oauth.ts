@@ -68,3 +68,94 @@ export async function exchangeCodeForToken(
 export function isValidShopDomain(shop: string): boolean {
   return /^[a-zA-Z0-9][a-zA-Z0-9-]*\.myshopify\.com$/.test(shop);
 }
+
+const ADMIN_VERSION = process.env.SHOPIFY_ADMIN_API_VERSION ?? "2025-01";
+
+export type ShopInfo = {
+  name: string;
+  email: string | null;
+  currencyCode: string;
+  primaryDomain: string;
+};
+
+/** Fetch basic shop metadata (name, currency) to seed the tenant record. */
+export async function getShopInfo(
+  shop: string,
+  adminToken: string,
+): Promise<ShopInfo | null> {
+  const res = await fetch(`https://${shop}/admin/api/${ADMIN_VERSION}/shop.json`, {
+    headers: { "X-Shopify-Access-Token": adminToken },
+  });
+  if (!res.ok) return null;
+  const { shop: s } = (await res.json()) as {
+    shop: {
+      name: string;
+      email?: string;
+      currency: string;
+      domain: string;
+    };
+  };
+  return {
+    name: s.name,
+    email: s.email ?? null,
+    currencyCode: s.currency,
+    primaryDomain: s.domain,
+  };
+}
+
+/**
+ * Provision a Storefront API access token for the shop so the headless
+ * storefront can read the catalogue with a public token.
+ */
+export async function createStorefrontToken(
+  shop: string,
+  adminToken: string,
+): Promise<string | null> {
+  const res = await fetch(
+    `https://${shop}/admin/api/${ADMIN_VERSION}/storefront_access_tokens.json`,
+    {
+      method: "POST",
+      headers: {
+        "X-Shopify-Access-Token": adminToken,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        storefront_access_token: { title: "Boutique Headless Storefront" },
+      }),
+    },
+  );
+  if (!res.ok) return null;
+  const json = (await res.json()) as {
+    storefront_access_token?: { access_token: string };
+  };
+  return json.storefront_access_token?.access_token ?? null;
+}
+
+/** Register the webhooks that keep the storefront in sync with Shopify. */
+export async function registerWebhooks(
+  shop: string,
+  adminToken: string,
+): Promise<void> {
+  const address = `${process.env.NEXT_PUBLIC_APP_URL}/api/revalidate`;
+  const topics = [
+    "products/update",
+    "products/delete",
+    "collections/update",
+    "inventory_levels/update",
+    "app/uninstalled",
+  ];
+  await Promise.all(
+    topics.map((topic) =>
+      fetch(`https://${shop}/admin/api/${ADMIN_VERSION}/webhooks.json`, {
+        method: "POST",
+        headers: {
+          "X-Shopify-Access-Token": adminToken,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          webhook: { topic, address, format: "json" },
+        }),
+      }).catch(() => {}),
+    ),
+  );
+}

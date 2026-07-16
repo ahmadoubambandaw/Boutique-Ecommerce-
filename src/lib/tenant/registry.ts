@@ -3,6 +3,7 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import type { Tenant } from "./types";
 import { featuresForPlan } from "./plans";
+import { findTenantByHost } from "./repository";
 
 /**
  * Tenant registry.
@@ -83,11 +84,15 @@ export const resolveTenant = cache(async (): Promise<Tenant> => {
 });
 
 /**
- * Look up a tenant by hostname. Replace the body with a real query:
- *   SELECT * FROM tenants WHERE custom_domain = $host OR slug = $subdomain
+ * Look up a tenant by hostname from the registry DB. Returns null when no DB is
+ * configured (single-tenant / demo mode), in which case the env-based default
+ * tenant is used instead.
  */
-async function loadTenantFromStore(_host: string): Promise<Tenant | null> {
-  // TODO(multi-tenant): query the tenant registry DB here.
-  // For now every host maps to the env-configured default tenant.
-  return null;
+async function loadTenantFromStore(host: string): Promise<Tenant | null> {
+  try {
+    return await findTenantByHost(host);
+  } catch {
+    // A DB hiccup must never take the storefront down — fall back to default.
+    return null;
+  }
 }

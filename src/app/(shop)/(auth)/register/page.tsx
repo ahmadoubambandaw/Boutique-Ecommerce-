@@ -1,27 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { registerSchema, type RegisterInput } from "@/lib/validations";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
+import { registerAction, type AuthState } from "@/lib/auth/actions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-export default function RegisterPage() {
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors, isSubmitting },
-  } = useForm<RegisterInput>({ resolver: zodResolver(registerSchema) });
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" size="lg" className="w-full" disabled={pending}>
+      {pending ? "Création…" : "Créer mon compte"}
+    </Button>
+  );
+}
 
-  const onSubmit = async (_data: RegisterInput) => {
-    // Integration point: Shopify customerCreate mutation (Storefront/Customer API).
-    await new Promise((r) => setTimeout(r, 700));
-    setError("root", {
-      message: "Démo : branchez la mutation Shopify customerCreate ici.",
-    });
-  };
+export default function RegisterPage() {
+  const [state, formAction] = useActionState<AuthState, FormData>(registerAction, {});
 
   return (
     <div className="mx-auto flex max-w-md flex-col px-4 py-20">
@@ -30,48 +26,34 @@ export default function RegisterPage() {
         Rejoignez-nous pour une expérience personnalisée.
       </p>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4">
+      <form action={formAction} className="mt-8 space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="mb-1.5 block text-sm font-medium">Prénom</label>
-            <Input {...register("firstName")} />
-            {errors.firstName && (
-              <p className="mt-1 text-xs text-red-500">{errors.firstName.message}</p>
-            )}
+            <Input name="firstName" required />
           </div>
           <div>
             <label className="mb-1.5 block text-sm font-medium">Nom</label>
-            <Input {...register("lastName")} />
-            {errors.lastName && (
-              <p className="mt-1 text-xs text-red-500">{errors.lastName.message}</p>
-            )}
+            <Input name="lastName" required />
           </div>
         </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium">E-mail</label>
-          <Input type="email" {...register("email")} />
-          {errors.email && (
-            <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
-          )}
+          <Input name="email" type="email" required />
         </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium">Mot de passe</label>
-          <Input type="password" {...register("password")} />
-          {errors.password && (
-            <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>
-          )}
+          <Input name="password" type="password" required minLength={8} />
         </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium">Confirmer le mot de passe</label>
-          <Input type="password" {...register("confirmPassword")} />
-          {errors.confirmPassword && (
-            <p className="mt-1 text-xs text-red-500">{errors.confirmPassword.message}</p>
-          )}
+          <Input name="confirmPassword" type="password" required minLength={8} />
         </div>
         <label className="flex items-start gap-2 text-sm">
           <input
+            name="acceptTerms"
             type="checkbox"
-            {...register("acceptTerms")}
+            required
             className="mt-0.5 h-4 w-4 accent-[hsl(var(--accent))]"
           />
           <span className="text-[hsl(var(--muted-foreground))]">
@@ -80,17 +62,12 @@ export default function RegisterPage() {
             <Link href="/privacy" className="underline">politique de confidentialité</Link>.
           </span>
         </label>
-        {errors.acceptTerms && (
-          <p className="text-xs text-red-500">{errors.acceptTerms.message}</p>
-        )}
-        {errors.root && (
-          <p className="rounded-xl bg-[hsl(var(--muted))] px-3 py-2 text-xs">
-            {errors.root.message}
+        {state.error && (
+          <p className="rounded-xl bg-red-500/10 px-3 py-2 text-xs text-red-500">
+            {state.error}
           </p>
         )}
-        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Création…" : "Créer mon compte"}
-        </Button>
+        <SubmitButton />
       </form>
 
       <p className="mt-6 text-center text-sm text-[hsl(var(--muted-foreground))]">

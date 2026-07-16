@@ -5,6 +5,8 @@ import {
   isValidShopDomain,
   verifyHmac,
 } from "@/lib/shopify/oauth";
+import { provisionTenant } from "@/lib/tenant/provision";
+import { isDbConfigured } from "@/lib/db/client";
 
 /**
  * Shopify OAuth callback. Verifies HMAC + state, exchanges the code for an
@@ -33,7 +35,22 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL("/pricing?error=token", appUrl));
   }
 
-  // TODO(multi-tenant): persist the tenant + token, register webhooks,
-  // create the Stripe subscription, then redirect to the merchant dashboard.
-  return NextResponse.redirect(new URL("/admin?onboarded=1", appUrl));
+  // Provision the tenant: Storefront token, webhooks, Stripe customer, DB row.
+  // Requires a database — without one we can't persist, so guide the operator.
+  if (!isDbConfigured()) {
+    return NextResponse.redirect(new URL("/admin?onboarded=nodb", appUrl));
+  }
+
+  try {
+    const tenant = await provisionTenant({ shop, adminToken: token });
+    if (!tenant) {
+      return NextResponse.redirect(new URL("/pricing?error=provision", appUrl));
+    }
+  } catch {
+    return NextResponse.redirect(new URL("/pricing?error=provision", appUrl));
+  }
+
+  const res = NextResponse.redirect(new URL("/admin?onboarded=1", appUrl));
+  res.cookies.delete("shopify_oauth_state");
+  return res;
 }
