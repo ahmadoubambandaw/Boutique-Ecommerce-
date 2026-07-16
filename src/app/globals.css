@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+   Design tokens — premium, minimalist palette (Apple/Tesla/Zara)
+   ───────────────────────────────────────────────────────────── */
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: hsl(0 0% 100%);
+  --color-foreground: hsl(240 10% 4%);
+  --color-muted: hsl(240 5% 96%);
+  --color-muted-foreground: hsl(240 4% 46%);
+  --color-border: hsl(240 6% 90%);
+  --color-accent: hsl(240 6% 10%);
+  --color-accent-foreground: hsl(0 0% 98%);
+  --color-ring: hsl(240 5% 65%);
+
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 4%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 4%;
+  --muted: 240 5% 96%;
+  --muted-foreground: 240 4% 46%;
+  --border: 240 6% 90%;
+  --input: 240 6% 90%;
+  --accent: 240 6% 10%;
+  --accent-foreground: 0 0% 98%;
+  --ring: 240 5% 65%;
+  --glass: 255 255 255;
+}
+
+:root[data-theme="dark"],
+.dark {
+  --background: 240 10% 4%;
+  --foreground: 0 0% 98%;
+  --card: 240 8% 6%;
+  --card-foreground: 0 0% 98%;
+  --muted: 240 4% 12%;
+  --muted-foreground: 240 5% 65%;
+  --border: 240 4% 16%;
+  --input: 240 4% 16%;
+  --accent: 0 0% 98%;
+  --accent-foreground: 240 6% 10%;
+  --ring: 240 5% 45%;
+  --glass: 10 10 12;
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background-color: hsl(var(--foreground));
+    color: hsl(var(--background));
+  }
+}
+
+@layer utilities {
+  /* Glassmorphism surface */
+  .glass {
+    background-color: rgba(var(--glass), 0.6);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid hsl(var(--border) / 0.6);
+  }
+  .glass-strong {
+    background-color: rgba(var(--glass), 0.8);
+    backdrop-filter: blur(28px) saturate(200%);
+    -webkit-backdrop-filter: blur(28px) saturate(200%);
+  }
+  /* Premium hover lift */
+  .lift {
+    transition: transform 0.5s var(--ease-premium), box-shadow 0.5s var(--ease-premium);
+  }
+  .lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -20px hsl(240 10% 4% / 0.25);
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  /* Hide scrollbar for horizontal rails */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Respect reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
