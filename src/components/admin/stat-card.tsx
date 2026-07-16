@@ -9,7 +9,7 @@ export function StatCard({
 }: {
   label: string;
   value: string;
-  change?: number;
+  change?: number | null;
   icon: React.ComponentType<{ className?: string }>;
 }) {
   const positive = (change ?? 0) >= 0;
@@ -22,7 +22,7 @@ export function StatCard({
       <p className="mt-3 text-3xl font-semibold tracking-tight tabular-nums">
         {value}
       </p>
-      {change !== undefined && (
+      {change !== undefined && change !== null && (
         <p
           className={cn(
             "mt-2 inline-flex items-center gap-1 text-sm",

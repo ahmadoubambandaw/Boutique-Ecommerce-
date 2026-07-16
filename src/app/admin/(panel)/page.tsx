@@ -4,20 +4,43 @@ import { formatPrice } from "@/lib/utils";
 import { StatCard } from "@/components/admin/stat-card";
 import { RevenueChart } from "@/components/admin/revenue-chart";
 import { Badge } from "@/components/ui/badge";
-import { STATUS_LABEL, type OrderStatus } from "@/lib/mock/orders";
-
 export const revalidate = 300;
+
+/** Human-friendly label for both demo statuses and Shopify fulfilment states. */
+const STATUS_LABELS: Record<string, string> = {
+  processing: "En traitement",
+  shipped: "Expédiée",
+  delivered: "Livrée",
+  canceled: "Annulée",
+  fulfilled: "Livrée",
+  unfulfilled: "En préparation",
+  partially_fulfilled: "Partielle",
+  in_progress: "En cours",
+  on_hold: "En attente",
+  scheduled: "Planifiée",
+};
+
+function statusLabel(status: string): string {
+  return STATUS_LABELS[status] ?? status;
+}
 
 export default async function AdminDashboard() {
   const m = await getDashboardMetrics();
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Vue d'ensemble</h1>
-        <p className="text-sm text-[hsl(var(--muted-foreground))]">
-          Indicateurs clés de votre boutique.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Vue d'ensemble</h1>
+          <p className="text-sm text-[hsl(var(--muted-foreground))]">
+            {m.source === "shopify"
+              ? "Données en temps réel depuis Shopify (90 derniers jours)."
+              : "Indicateurs clés de votre boutique."}
+          </p>
+        </div>
+        <Badge variant={m.source === "shopify" ? "default" : "muted"}>
+          {m.source === "shopify" ? "Shopify · live" : "Démo"}
+        </Badge>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -35,16 +58,22 @@ export default async function AdminDashboard() {
         />
         <StatCard
           label="Visiteurs"
-          value={m.visitors.toLocaleString("fr-FR")}
+          value={m.visitors !== null ? m.visitors.toLocaleString("fr-FR") : "—"}
           change={m.visitorsChange}
           icon={Eye}
         />
         <StatCard
           label="Taux de conversion"
-          value={`${m.conversionRate}%`}
+          value={m.conversionRate !== null ? `${m.conversionRate}%` : "—"}
           icon={Percent}
         />
       </div>
+      {m.source === "shopify" && m.visitors === null && (
+        <p className="text-xs text-[hsl(var(--muted-foreground))]">
+          Visiteurs & conversion : connectez Google Analytics dans les paramètres
+          pour les afficher (l'API Admin ne fournit pas le trafic web).
+        </p>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         <RevenueChart data={m.revenueSeries} />
@@ -92,9 +121,7 @@ export default async function AdminDashboard() {
                     {o.customer}
                   </td>
                   <td className="py-3">
-                    <Badge variant="muted">
-                      {STATUS_LABEL[o.status as OrderStatus] ?? o.status}
-                    </Badge>
+                    <Badge variant="muted">{statusLabel(o.status)}</Badge>
                   </td>
                   <td className="py-3 text-right tabular-nums">
                     {formatPrice(o.total, m.currency)}

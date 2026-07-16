@@ -1,5 +1,7 @@
 import "server-only";
 import { PLANS } from "@/lib/tenant/plans";
+import { listTenants } from "@/lib/tenant/repository";
+import { isDbConfigured } from "@/lib/db/client";
 import type { SubscriptionPlan, SubscriptionStatus } from "@/lib/tenant/types";
 
 /**
@@ -35,8 +37,33 @@ export type PlatformOverview = {
   planBreakdown: Record<SubscriptionPlan, number>;
 };
 
+/** Build a Super-Admin summary from live tenant rows when a DB is configured. */
+async function loadRealTenants(): Promise<TenantSummary[] | null> {
+  if (!isDbConfigured()) return null;
+  try {
+    const tenants = await listTenants();
+    if (tenants.length === 0) return null;
+    return tenants.map((t) => {
+      const billable = t.status === "active" || t.status === "past_due";
+      return {
+        id: t.id,
+        storeName: t.branding.storeName,
+        domain: t.customDomain ?? `${t.slug}.boutique.app`,
+        plan: t.plan,
+        status: t.status,
+        mrr: billable ? PLANS[t.plan].priceMonthly : 0,
+        createdAt: t.createdAt.slice(0, 10),
+        // Per-tenant order counts would require N Admin API calls — computed lazily elsewhere.
+        orders30d: 0,
+      };
+    });
+  } catch {
+    return null;
+  }
+}
+
 export async function getPlatformOverview(): Promise<PlatformOverview> {
-  const tenants = DEMO_TENANTS;
+  const tenants = (await loadRealTenants()) ?? DEMO_TENANTS;
   const totalMrr = tenants.reduce((n, t) => n + t.mrr, 0);
   const activeCount = tenants.filter((t) => t.status === "active").length;
   const trialingCount = tenants.filter((t) => t.status === "trialing").length;

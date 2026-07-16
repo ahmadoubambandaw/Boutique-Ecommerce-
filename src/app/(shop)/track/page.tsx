@@ -1,33 +1,27 @@
 "use client";
 
-import * as React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, Package, Truck } from "lucide-react";
-import { trackOrderSchema, type TrackOrderInput } from "@/lib/validations";
-import { MOCK_ORDERS, type Order } from "@/lib/mock/orders";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
+import { Check, ExternalLink, Package, Truck } from "lucide-react";
+import { trackOrderAction, type TrackingResult } from "@/lib/actions/orders";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export default function TrackPage() {
-  const [order, setOrder] = React.useState<Order | null>(null);
-  const [notFound, setNotFound] = React.useState(false);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<TrackOrderInput>({ resolver: zodResolver(trackOrderSchema) });
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" size="lg" className="w-full" disabled={pending}>
+      {pending ? "Recherche…" : "Suivre"}
+    </Button>
+  );
+}
 
-  const onSubmit = async (data: TrackOrderInput) => {
-    await new Promise((r) => setTimeout(r, 500));
-    // Integration point: Shopify Admin API order lookup by name + email.
-    const match = MOCK_ORDERS.find(
-      (o) => o.number.replace("#", "") === data.orderNumber.replace("#", ""),
-    );
-    setOrder(match ?? null);
-    setNotFound(!match);
-  };
+export default function TrackPage() {
+  const [state, formAction] = useActionState<TrackingResult, FormData>(
+    trackOrderAction,
+    { found: false },
+  );
 
   return (
     <div className="mx-auto max-w-xl px-4 py-20">
@@ -39,43 +33,34 @@ export default function TrackPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <Input placeholder="Numéro de commande (ex : 1042)" {...register("orderNumber")} />
-          {errors.orderNumber && (
-            <p className="mt-1 text-xs text-red-500">{errors.orderNumber.message}</p>
-          )}
-        </div>
-        <div>
-          <Input type="email" placeholder="E-mail" {...register("email")} />
-          {errors.email && (
-            <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
-          )}
-        </div>
-        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Recherche…" : "Suivre"}
-        </Button>
+      <form action={formAction} className="space-y-4">
+        <Input name="orderNumber" placeholder="Numéro de commande (ex : 1042)" required />
+        <Input name="email" type="email" placeholder="E-mail" required />
+        <SubmitButton />
       </form>
 
-      {notFound && (
+      {state.error && (
         <p className="mt-6 rounded-xl bg-[hsl(var(--muted))] px-4 py-3 text-sm">
-          Aucune commande trouvée. Essayez « 1042 » pour la démo.
+          {state.error}
         </p>
       )}
 
-      {order?.tracking && (
+      {state.found && state.steps && (
         <div className="mt-8 rounded-3xl border border-[hsl(var(--border))] p-6">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <p className="font-medium">Commande {order.number}</p>
-              <p className="text-sm text-[hsl(var(--muted-foreground))]">
-                {order.tracking.carrier} · {order.tracking.number}
-              </p>
+              <p className="font-medium">Commande {state.orderNumber}</p>
+              {state.carrier && (
+                <p className="text-sm text-[hsl(var(--muted-foreground))]">
+                  {state.carrier}
+                  {state.trackingNumber ? ` · ${state.trackingNumber}` : ""}
+                </p>
+              )}
             </div>
             <Package className="h-8 w-8" />
           </div>
           <ol className="space-y-4">
-            {order.tracking.steps.map((step, i) => (
+            {state.steps.map((step, i) => (
               <li key={i} className="flex items-center gap-3">
                 <span
                   className={cn(
@@ -93,6 +78,16 @@ export default function TrackPage() {
               </li>
             ))}
           </ol>
+          {state.trackingUrl && (
+            <a
+              href={state.trackingUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 inline-flex items-center gap-2 text-sm font-medium underline"
+            >
+              Suivre chez le transporteur <ExternalLink className="h-4 w-4" />
+            </a>
+          )}
         </div>
       )}
     </div>
