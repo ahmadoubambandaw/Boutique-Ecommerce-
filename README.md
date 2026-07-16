@@ -193,14 +193,21 @@ et pointez-les vers le projet ; `resolveTenant()` route par `host`.
   (couleurs, police, arrondis, logo, favicon, bannière, SEO, Pixel/GA), persisté
   en DB et appliqué instantanément (`lib/tenant/settings-actions.ts`).
 
+- **Tests** — 32 tests unitaires Vitest (utils, plans, facturation Stripe,
+  sessions admin, hachage, normalisation). `npm test`.
+- **Monitoring** — `lib/monitoring.ts` (point unique prêt pour Sentry), branché
+  sur les error boundaries et le provisioning OAuth.
+- **Newsletter fonctionnelle** — opt-in marketing via l'API Admin Shopify.
+- **Polices alternatives** — Inter & Playfair chargées via `next/font`, appliquées
+  selon le thème du tenant.
+- **CI** — `.github/workflows/ci.yml` (typecheck, lint, test, build).
+
 ### ⏳ Reste à finaliser
 - Factures PDF (l'API Admin expose l'URL de statut de commande, pas le PDF —
   générer via un service tiers ou l'API Order Printer)
 - Visiteurs / taux de conversion (brancher Google Analytics / Plausible)
-- Newsletter / Contact (ESP / helpdesk)
-- Chargement effectif des polices alternatives (le choix est persisté ; seule
-  Geist est câblée pour l'instant)
-- Tests automatisés (unitaires + E2E) et monitoring
+- Tests E2E (Playwright) en complément des tests unitaires
+- Bonus du cahier des charges : multi-devise, multi-langue, chat, notifications
 
 ### Mise en route base de données
 ```bash
