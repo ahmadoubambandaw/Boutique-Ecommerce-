@@ -186,14 +186,21 @@ et pointez-les vers le projet ; `resolveTenant()` route par `host`.
 - **Suivi de commande réel** — recherche par numéro + e-mail via l'API Admin
   (transporteur, numéro, timeline) — `lib/actions/orders.ts`.
 
+- **Middleware multi-domaine** — `middleware.ts` résout le host tenant sur toutes
+  les routes et le transmet via `x-tenant-host` (la résolution DB reste côté
+  serveur). Prévisualisation d'un tenant via `?__tenant=slug`.
+- **Éditeur de thème tenant** — formulaire self-service dans `/admin/settings`
+  (couleurs, police, arrondis, logo, favicon, bannière, SEO, Pixel/GA), persisté
+  en DB et appliqué instantanément (`lib/tenant/settings-actions.ts`).
+
 ### ⏳ Reste à finaliser
-- Middleware multi-domaine (résolution tenant par host — la résolution DB existe
-  déjà côté serveur via `resolveTenant()`)
 - Factures PDF (l'API Admin expose l'URL de statut de commande, pas le PDF —
   générer via un service tiers ou l'API Order Printer)
 - Visiteurs / taux de conversion (brancher Google Analytics / Plausible)
 - Newsletter / Contact (ESP / helpdesk)
-- Éditeur de thème tenant (le modèle existe, l'UI d'édition reste à faire)
+- Chargement effectif des polices alternatives (le choix est persisté ; seule
+  Geist est câblée pour l'instant)
+- Tests automatisés (unitaires + E2E) et monitoring
 
 ### Mise en route base de données
 ```bash
