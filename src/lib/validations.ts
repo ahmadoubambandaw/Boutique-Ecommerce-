@@ -38,6 +38,31 @@ export const newsletterSchema = z.object({
 });
 export type NewsletterInput = z.infer<typeof newsletterSchema>;
 
+/** HSL triplet like "240 6% 10%" used by the theme tokens. */
+const hslTriplet = z
+  .string()
+  .regex(/^\d{1,3}\s+\d{1,3}%\s+\d{1,3}%$/, "Format HSL attendu : « 240 6% 10% »");
+
+export const tenantSettingsSchema = z.object({
+  storeName: z.string().min(1, "Nom requis").max(60),
+  tagline: z.string().max(120).optional().or(z.literal("")),
+  logoUrl: z.string().url("URL invalide").optional().or(z.literal("")),
+  faviconUrl: z.string().url("URL invalide").optional().or(z.literal("")),
+  accent: hslTriplet,
+  primary: hslTriplet,
+  radius: z.enum(["sharp", "soft", "round"]),
+  fontFamily: z.enum(["geist", "inter", "playfair", "satoshi"]),
+  defaultMode: z.enum(["light", "dark", "system"]),
+  metaTitle: z.string().max(70).optional().or(z.literal("")),
+  metaDescription: z.string().max(180).optional().or(z.literal("")),
+  metaPixelId: z.string().max(40).optional().or(z.literal("")),
+  googleAnalyticsId: z.string().max(40).optional().or(z.literal("")),
+  bannerMessage: z.string().max(140).optional().or(z.literal("")),
+  bannerHref: z.string().optional().or(z.literal("")),
+  bannerActive: z.boolean().optional(),
+});
+export type TenantSettingsInput = z.infer<typeof tenantSettingsSchema>;
+
 export const trackOrderSchema = z.object({
   orderNumber: z.string().min(1, "Numéro de commande requis"),
   email: z.string().email("Adresse e-mail invalide"),

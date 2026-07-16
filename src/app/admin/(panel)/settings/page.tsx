@@ -2,6 +2,7 @@ import { resolveTenant } from "@/lib/tenant/registry";
 import { PLANS } from "@/lib/tenant/plans";
 import { formatPrice } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { TenantSettingsForm } from "@/components/admin/tenant-settings-form";
 
 export default async function AdminSettingsPage() {
   const tenant = await resolveTenant();
@@ -59,9 +60,19 @@ export default async function AdminSettingsPage() {
         </div>
       </div>
 
-      {/* Configuration */}
+      {/* Storefront customization */}
       <div className="rounded-2xl border border-[hsl(var(--border))] p-5">
-        <h2 className="mb-4 font-semibold">Configuration</h2>
+        <h2 className="mb-1 font-semibold">Personnalisation de la boutique</h2>
+        <p className="mb-6 text-sm text-[hsl(var(--muted-foreground))]">
+          Couleurs, police, logo, bannière et SEO — appliqués instantanément à
+          votre storefront.
+        </p>
+        <TenantSettingsForm tenant={tenant} />
+      </div>
+
+      {/* Configuration summary */}
+      <div className="rounded-2xl border border-[hsl(var(--border))] p-5">
+        <h2 className="mb-4 font-semibold">Récapitulatif technique</h2>
         <dl className="divide-y divide-[hsl(var(--border))]">
           {rows.map(([k, v]) => (
             <div key={k} className="flex items-center justify-between py-3 text-sm">

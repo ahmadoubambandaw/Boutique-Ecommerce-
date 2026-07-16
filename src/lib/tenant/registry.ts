@@ -76,8 +76,13 @@ function defaultTenant(): Tenant {
  */
 export const resolveTenant = cache(async (): Promise<Tenant> => {
   const hdrs = await headers();
+  // `x-tenant-host` is set by the middleware (handles preview overrides);
+  // fall back to the raw forwarded host when middleware didn't run.
   const host =
-    hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "";
+    hdrs.get("x-tenant-host") ??
+    hdrs.get("x-forwarded-host") ??
+    hdrs.get("host") ??
+    "";
 
   const tenant = await loadTenantFromStore(host);
   return tenant ?? defaultTenant();

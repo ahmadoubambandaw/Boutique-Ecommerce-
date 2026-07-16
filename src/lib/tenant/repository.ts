@@ -154,6 +154,23 @@ export async function listTenants(): Promise<Tenant[]> {
   return rows.map(rowToTenant);
 }
 
+/** Update a tenant's presentation config (branding, theme, SEO, integrations). */
+export async function updateTenantConfig(
+  tenantId: string,
+  patch: Partial<
+    Pick<TenantRow, "branding" | "theme" | "seo" | "integrations" | "banners" | "customDomain">
+  >,
+): Promise<Tenant | null> {
+  const db = getDb();
+  if (!db) return null;
+  const [row] = await db
+    .update(tenants)
+    .set({ ...patch, updatedAt: new Date() })
+    .where(eq(tenants.id, tenantId))
+    .returning();
+  return row ? rowToTenant(row) : null;
+}
+
 export async function attachStripeCustomer(
   tenantId: string,
   stripeCustomerId: string,
