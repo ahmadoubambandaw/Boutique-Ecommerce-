@@ -176,12 +176,24 @@ et pointez-les vers le projet ; `resolveTenant()` route par `host`.
 > Ces couches se dégradent proprement : sans `DATABASE_URL` / `STRIPE_SECRET_KEY`
 > l'app tourne en mode démo (données de démonstration) et le build reste vert.
 
+### ✅ Implémenté (bloc important)
+- **Sécurité `/admin`** — auth admin (scrypt + session HMAC via Web Crypto),
+  rôles (`admin_users`), middleware edge protégeant `/admin/*` et `/admin/super`
+  (`super_admin`), avec passthrough en mode démo. Seed : `npm run seed:admin`.
+- **Analytics dashboard réelles** — chiffre d'affaires, série hebdo, nombre de
+  commandes, produits populaires, commandes récentes calculés depuis l'API Admin
+  Shopify (`lib/shopify/admin.ts`, `lib/admin/analytics.ts`). Badge « live/démo ».
+- **Suivi de commande réel** — recherche par numéro + e-mail via l'API Admin
+  (transporteur, numéro, timeline) — `lib/actions/orders.ts`.
+
 ### ⏳ Reste à finaliser
-- Sécurité des routes `/admin` (auth + rôles via `admin_users`)
-- Middleware multi-domaine (`middleware.ts`)
-- Suivi de commande / factures PDF via Shopify Admin API (`track`)
-- Analytics dashboard réelles (Admin API)
+- Middleware multi-domaine (résolution tenant par host — la résolution DB existe
+  déjà côté serveur via `resolveTenant()`)
+- Factures PDF (l'API Admin expose l'URL de statut de commande, pas le PDF —
+  générer via un service tiers ou l'API Order Printer)
+- Visiteurs / taux de conversion (brancher Google Analytics / Plausible)
 - Newsletter / Contact (ESP / helpdesk)
+- Éditeur de thème tenant (le modèle existe, l'UI d'édition reste à faire)
 
 ### Mise en route base de données
 ```bash
