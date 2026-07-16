@@ -8,6 +8,7 @@ import {
 import { provisionTenant } from "@/lib/tenant/provision";
 import { isDbConfigured } from "@/lib/db/client";
 import { captureError } from "@/lib/monitoring";
+import { appUrl } from "@/lib/urls";
 
 /**
  * Shopify OAuth callback. Verifies HMAC + state, exchanges the code for an
@@ -17,42 +18,42 @@ import { captureError } from "@/lib/monitoring";
 export async function GET(request: Request) {
   const params = Object.fromEntries(new URL(request.url).searchParams.entries());
   const { shop, code, state } = params;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? request.url;
+  const base = appUrl();
 
   const savedState = (await cookies()).get("shopify_oauth_state")?.value;
 
   if (!shop || !isValidShopDomain(shop) || !code) {
-    return NextResponse.redirect(new URL("/pricing?error=invalid", appUrl));
+    return NextResponse.redirect(new URL("/pricing?error=invalid", base));
   }
   if (!state || state !== savedState) {
-    return NextResponse.redirect(new URL("/pricing?error=state", appUrl));
+    return NextResponse.redirect(new URL("/pricing?error=state", base));
   }
   if (!verifyHmac(params)) {
-    return NextResponse.redirect(new URL("/pricing?error=hmac", appUrl));
+    return NextResponse.redirect(new URL("/pricing?error=hmac", base));
   }
 
   const token = await exchangeCodeForToken(shop, code);
   if (!token) {
-    return NextResponse.redirect(new URL("/pricing?error=token", appUrl));
+    return NextResponse.redirect(new URL("/pricing?error=token", base));
   }
 
   // Provision the tenant: Storefront token, webhooks, Stripe customer, DB row.
   // Requires a database — without one we can't persist, so guide the operator.
   if (!isDbConfigured()) {
-    return NextResponse.redirect(new URL("/admin?onboarded=nodb", appUrl));
+    return NextResponse.redirect(new URL("/admin?onboarded=nodb", base));
   }
 
   try {
     const tenant = await provisionTenant({ shop, adminToken: token });
     if (!tenant) {
-      return NextResponse.redirect(new URL("/pricing?error=provision", appUrl));
+      return NextResponse.redirect(new URL("/pricing?error=provision", base));
     }
   } catch (err) {
     captureError(err, { stage: "oauth-provision", shop });
-    return NextResponse.redirect(new URL("/pricing?error=provision", appUrl));
+    return NextResponse.redirect(new URL("/pricing?error=provision", base));
   }
 
-  const res = NextResponse.redirect(new URL("/admin?onboarded=1", appUrl));
+  const res = NextResponse.redirect(new URL("/admin?onboarded=1", base));
   res.cookies.delete("shopify_oauth_state");
   return res;
 }

@@ -1,15 +1,12 @@
 import "server-only";
 import { getStripe } from "./client";
 import { PLANS } from "@/lib/tenant/plans";
+import { appUrl } from "@/lib/urls";
 import type { SubscriptionPlan, SubscriptionStatus } from "@/lib/tenant/types";
 
 /** Resolve a plan's Stripe Price id from its configured env var. */
 export function priceIdForPlan(plan: SubscriptionPlan): string | null {
   return process.env[PLANS[plan].stripePriceEnv] ?? null;
-}
-
-function appUrl() {
-  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 }
 
 /**

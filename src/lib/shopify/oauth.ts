@@ -1,5 +1,6 @@
 import "server-only";
 import crypto from "node:crypto";
+import { appUrl } from "@/lib/urls";
 
 /**
  * Shopify OAuth helpers for multi-tenant onboarding.
@@ -16,7 +17,7 @@ import crypto from "node:crypto";
 export function buildAuthUrl(shop: string, state: string) {
   const apiKey = process.env.SHOPIFY_API_KEY ?? "";
   const scopes = process.env.SHOPIFY_APP_SCOPES ?? "read_products";
-  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/shopify/callback`;
+  const redirectUri = `${appUrl()}/api/auth/shopify/callback`;
   const params = new URLSearchParams({
     client_id: apiKey,
     scope: scopes,
@@ -136,7 +137,7 @@ export async function registerWebhooks(
   shop: string,
   adminToken: string,
 ): Promise<void> {
-  const address = `${process.env.NEXT_PUBLIC_APP_URL}/api/revalidate`;
+  const address = `${appUrl()}/api/revalidate`;
   const topics = [
     "products/update",
     "products/delete",

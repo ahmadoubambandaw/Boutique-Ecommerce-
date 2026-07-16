@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { buildAuthUrl, isValidShopDomain } from "@/lib/shopify/oauth";
+import { appUrl } from "@/lib/urls";
 
 /**
  * Begin the Shopify OAuth install flow for a new tenant.
@@ -11,9 +12,7 @@ export async function GET(request: Request) {
 
   if (!shop || !isValidShopDomain(shop)) {
     // No/invalid shop → send the merchant to an onboarding prompt.
-    return NextResponse.redirect(
-      new URL("/pricing", process.env.NEXT_PUBLIC_APP_URL ?? request.url),
-    );
+    return NextResponse.redirect(new URL("/pricing", appUrl()));
   }
 
   if (!process.env.SHOPIFY_API_KEY) {

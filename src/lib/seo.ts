@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { resolveTenant } from "@/lib/tenant/registry";
+import { appUrl } from "@/lib/urls";
 
-export function appUrl() {
-  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-}
+export { appUrl };
 
 /** Build the base per-tenant Metadata (title template, OG, Twitter, icons). */
 export async function buildBaseMetadata(): Promise<Metadata> {
