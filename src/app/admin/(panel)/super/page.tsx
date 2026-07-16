@@ -1,5 +1,8 @@
+import { redirect } from "next/navigation";
 import { Building2, TrendingUp, Users, Wallet } from "lucide-react";
 import { getPlatformOverview } from "@/lib/admin/tenants";
+import { getAdminSession } from "@/lib/auth/admin-actions";
+import { isDbConfigured } from "@/lib/db/client";
 import { formatPrice } from "@/lib/utils";
 import { StatCard } from "@/components/admin/stat-card";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +28,13 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export default async function SuperAdminPage() {
+  // Defense in depth: the middleware already gates this route, but re-check the
+  // role server-side when a database is configured.
+  if (isDbConfigured()) {
+    const session = await getAdminSession();
+    if (session?.role !== "super_admin") redirect("/admin");
+  }
+
   const o = await getPlatformOverview();
 
   return (

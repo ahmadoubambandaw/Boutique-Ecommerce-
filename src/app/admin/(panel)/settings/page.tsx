@@ -43,6 +43,20 @@ export default async function AdminSettingsPage() {
             <li key={h}>• {h}</li>
           ))}
         </ul>
+        <div className="mt-5 flex gap-3">
+          <a
+            href="/api/stripe/portal"
+            className="inline-flex h-10 items-center rounded-full bg-[hsl(var(--accent))] px-5 text-sm font-medium text-[hsl(var(--accent-foreground))]"
+          >
+            Gérer l'abonnement
+          </a>
+          <a
+            href="/pricing"
+            className="inline-flex h-10 items-center rounded-full border border-[hsl(var(--border))] px-5 text-sm hover:bg-[hsl(var(--muted))]"
+          >
+            Changer de plan
+          </a>
+        </div>
       </div>
 
       {/* Configuration */}
