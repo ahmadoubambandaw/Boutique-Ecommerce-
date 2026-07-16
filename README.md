@@ -201,13 +201,26 @@ et pointez-les vers le projet ; `resolveTenant()` route par `host`.
 - **Polices alternatives** — Inter & Playfair chargées via `next/font`, appliquées
   selon le thème du tenant.
 - **CI** — `.github/workflows/ci.yml` (typecheck, lint, test, build).
+- **Déploiement zéro-config** — tourne en mode démo complet sans aucune variable
+  d'environnement ; URL auto-détectée sur Vercel (`lib/urls.ts`).
+
+- **Notifications** — file de toasts (`lib/store/toast.ts` + `<Toaster>`), branchée
+  sur l'ajout panier, favoris et achat.
+- **Multi-devise** — EUR/USD/GBP/CHF/CAD via `<Price>` (conversion démo ; chemin
+  `@inContext` Shopify documenté pour les prix localisés réels).
+- **Multi-langue** — store de locale + dictionnaire FR/EN + `useT()` ; chrome
+  traduit + sélecteur langue/devise dans le header.
+- **Chat en direct** — assistant flottant avec réponses rapides (point
+  d'intégration Crisp/Intercom).
+- **PWA offline** — service worker (app-shell + fallback hors ligne), page
+  `/offline`, enregistrement en production.
 
 ### ⏳ Reste à finaliser
 - Factures PDF (l'API Admin expose l'URL de statut de commande, pas le PDF —
   générer via un service tiers ou l'API Order Printer)
 - Visiteurs / taux de conversion (brancher Google Analytics / Plausible)
 - Tests E2E (Playwright) en complément des tests unitaires
-- Bonus du cahier des charges : multi-devise, multi-langue, chat, notifications
+- i18n complet du contenu des pages (le chrome est traduit ; corps des pages en FR)
 
 ### Mise en route base de données
 ```bash
