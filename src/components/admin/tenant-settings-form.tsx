@@ -151,10 +151,9 @@ export function TenantSettingsForm({ tenant }: { tenant: Tenant }) {
               name="fontFamily"
               defaultValue={tenant.theme.fontFamily}
               options={[
-                { value: "geist", label: "Geist" },
-                { value: "inter", label: "Inter" },
-                { value: "playfair", label: "Playfair" },
-                { value: "satoshi", label: "Satoshi" },
+                { value: "geist", label: "Geist (sans)" },
+                { value: "inter", label: "Inter (sans)" },
+                { value: "playfair", label: "Playfair (serif)" },
               ]}
             />
           </Field>

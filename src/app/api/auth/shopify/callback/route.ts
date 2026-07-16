@@ -7,6 +7,7 @@ import {
 } from "@/lib/shopify/oauth";
 import { provisionTenant } from "@/lib/tenant/provision";
 import { isDbConfigured } from "@/lib/db/client";
+import { captureError } from "@/lib/monitoring";
 
 /**
  * Shopify OAuth callback. Verifies HMAC + state, exchanges the code for an
@@ -46,7 +47,8 @@ export async function GET(request: Request) {
     if (!tenant) {
       return NextResponse.redirect(new URL("/pricing?error=provision", appUrl));
     }
-  } catch {
+  } catch (err) {
+    captureError(err, { stage: "oauth-provision", shop });
     return NextResponse.redirect(new URL("/pricing?error=provision", appUrl));
   }
 

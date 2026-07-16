@@ -1,28 +1,31 @@
 "use client";
 
-import * as React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { Check } from "lucide-react";
-import { newsletterSchema, type NewsletterInput } from "@/lib/validations";
+import {
+  subscribeNewsletterAction,
+  type NewsletterState,
+} from "@/lib/actions/newsletter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending}>
+      {pending ? "…" : "S'inscrire"}
+    </Button>
+  );
+}
+
 export function Newsletter() {
-  const [done, setDone] = React.useState(false);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<NewsletterInput>({ resolver: zodResolver(newsletterSchema) });
+  const [state, formAction] = useActionState<NewsletterState, FormData>(
+    subscribeNewsletterAction,
+    {},
+  );
 
-  const onSubmit = async (_data: NewsletterInput) => {
-    // Wire to Shopify customer marketing consent / your ESP here.
-    await new Promise((r) => setTimeout(r, 600));
-    setDone(true);
-  };
-
-  if (done) {
+  if (state.ok) {
     return (
       <p className="flex items-center gap-2 text-sm">
         <Check className="h-4 w-4" /> Merci ! Vous êtes inscrit·e.
@@ -31,21 +34,18 @@ export function Newsletter() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
+    <form action={formAction} className="space-y-2">
       <div className="flex gap-2">
         <Input
+          name="email"
           type="email"
+          required
           placeholder="Votre e-mail"
           aria-label="Adresse e-mail"
-          {...register("email")}
         />
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "…" : "S'inscrire"}
-        </Button>
+        <SubmitButton />
       </div>
-      {errors.email && (
-        <p className="text-xs text-red-500">{errors.email.message}</p>
-      )}
+      {state.error && <p className="text-xs text-red-500">{state.error}</p>}
     </form>
   );
 }

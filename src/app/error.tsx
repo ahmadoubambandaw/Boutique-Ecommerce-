@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { captureError } from "@/lib/monitoring";
 
 export default function Error({
   error,
@@ -11,8 +12,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Report to your monitoring service (Sentry, etc.).
-    console.error(error);
+    captureError(error, { digest: error.digest, boundary: "app/error" });
   }, [error]);
 
   return (

@@ -60,7 +60,9 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-feature-settings: "cv11", "ss01";
+    /* Per-tenant font (set on <body>); falls back to Geist. */
+    font-family: var(--font-active, var(--font-geist-sans)), ui-sans-serif,
+      system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
