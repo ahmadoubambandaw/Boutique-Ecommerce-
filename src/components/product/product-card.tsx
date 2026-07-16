@@ -6,10 +6,13 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Heart, Plus } from "lucide-react";
 import type { Product } from "@/lib/shopify/types";
-import { cn, discountPercent, formatPrice } from "@/lib/utils";
+import { cn, discountPercent } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Price } from "@/components/ui/price";
 import { useWishlist } from "@/lib/store/wishlist";
 import { useCart } from "@/lib/store/cart";
+import { toast } from "@/lib/store/toast";
+import { useT } from "@/lib/store/locale";
 
 export function ProductCard({
   product,
@@ -22,6 +25,7 @@ export function ProductCard({
 }) {
   const wishlist = useWishlist();
   const addToCart = useCart((s) => s.add);
+  const { t } = useT();
   const inWishlist = wishlist.items.some((i) => i.handle === product.handle);
 
   const price = product.priceRange.minVariantPrice;
@@ -44,10 +48,12 @@ export function ProductCard({
       price: variant.price.amount,
       currencyCode: variant.price.currencyCode,
     });
+    toast.success(t("toast.addedToCart"), "/cart");
   };
 
   const toggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
+    const wasIn = inWishlist;
     wishlist.toggle({
       handle: product.handle,
       title: product.title,
@@ -55,6 +61,10 @@ export function ProductCard({
       price: price.amount,
       currencyCode: price.currencyCode,
     });
+    toast.info(
+      wasIn ? t("toast.removedFromWishlist") : t("toast.addedToWishlist"),
+      wasIn ? undefined : "/wishlist",
+    );
   };
 
   return (
@@ -122,13 +132,17 @@ export function ProductCard({
           </p>
           <h3 className="line-clamp-1 font-medium">{product.title}</h3>
           <div className="flex items-center gap-2">
-            <span className="font-medium tabular-nums">
-              {formatPrice(price.amount, price.currencyCode)}
-            </span>
+            <Price
+              amount={price.amount}
+              baseCurrency={price.currencyCode}
+              className="font-medium tabular-nums"
+            />
             {discount && (
-              <span className="text-sm text-[hsl(var(--muted-foreground))] line-through tabular-nums">
-                {formatPrice(compareAt.amount, compareAt.currencyCode)}
-              </span>
+              <Price
+                amount={compareAt.amount}
+                baseCurrency={compareAt.currencyCode}
+                className="text-sm text-[hsl(var(--muted-foreground))] line-through tabular-nums"
+              />
             )}
           </div>
         </div>

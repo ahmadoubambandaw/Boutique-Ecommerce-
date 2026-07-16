@@ -3,6 +3,8 @@ import { Footer } from "@/components/layout/footer";
 import { CartDrawer } from "@/components/cart/cart-drawer";
 import { CompareBar } from "@/components/product/compare-bar";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
+import { Toaster } from "@/components/ui/toaster";
+import { LiveChat } from "@/components/chat/live-chat";
 import { resolveTenant } from "@/lib/tenant/registry";
 
 /** Storefront shell — the customer-facing chrome (header, footer, cart, …). */
@@ -21,6 +23,8 @@ export default async function StorefrontLayout({
       <Footer storeName={tenant.branding.storeName} />
       <CartDrawer />
       <CompareBar />
+      <Toaster />
+      <LiveChat />
     </>
   );
 }

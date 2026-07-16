@@ -9,13 +9,16 @@ import { useCart } from "@/lib/store/cart";
 import { useWishlist } from "@/lib/store/wishlist";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SearchCommand } from "@/components/search/search-command";
+import { LocaleSwitcher } from "@/components/layout/locale-switcher";
+import { useT } from "@/lib/store/locale";
+import type { TranslationKey } from "@/lib/i18n/dictionary";
 
-const NAV = [
-  { label: "Catalogue", href: "/products" },
-  { label: "Collections", href: "/collections" },
-  { label: "Nouveautés", href: "/collections/nouveautes" },
-  { label: "Blog", href: "/blog" },
-  { label: "À propos", href: "/about" },
+const NAV: { key: TranslationKey; href: string }[] = [
+  { key: "nav.catalog", href: "/products" },
+  { key: "nav.collections", href: "/collections" },
+  { key: "nav.new", href: "/collections/nouveautes" },
+  { key: "nav.blog", href: "/blog" },
+  { key: "nav.about", href: "/about" },
 ];
 
 export function Header({ storeName = "Boutique" }: { storeName?: string }) {
@@ -23,6 +26,7 @@ export function Header({ storeName = "Boutique" }: { storeName?: string }) {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
 
+  const { t } = useT();
   const cartCount = useCart((s) => s.lines.reduce((n, l) => n + l.quantity, 0));
   const openCart = useCart((s) => s.open);
   const wishlistCount = useWishlist((s) => s.items.length);
@@ -64,7 +68,7 @@ export function Header({ storeName = "Boutique" }: { storeName?: string }) {
                 href={item.href}
                 className="relative rounded-full px-4 py-2 text-sm font-medium text-[hsl(var(--muted-foreground))] transition-colors hover:text-[hsl(var(--foreground))]"
               >
-                {item.label}
+                {t(item.key)}
               </Link>
             ))}
           </nav>
@@ -78,6 +82,7 @@ export function Header({ storeName = "Boutique" }: { storeName?: string }) {
               <Search className="h-5 w-5" />
             </button>
             <ThemeToggle />
+            <LocaleSwitcher />
             <Link
               href="/wishlist"
               aria-label="Favoris"
@@ -157,7 +162,7 @@ export function Header({ storeName = "Boutique" }: { storeName?: string }) {
                     onClick={() => setMenuOpen(false)}
                     className="rounded-xl px-4 py-3 text-lg font-medium hover:bg-[hsl(var(--muted))]"
                   >
-                    {item.label}
+                    {t(item.key)}
                   </Link>
                 ))}
                 <Link

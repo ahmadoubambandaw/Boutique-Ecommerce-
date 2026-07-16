@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { useCart } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/utils";
+import { Price } from "@/components/ui/price";
 import { Button } from "@/components/ui/button";
 import { startCheckoutAction } from "@/lib/actions/checkout";
 
@@ -182,12 +183,11 @@ export function CartDrawer() {
                                 <Plus className="h-3.5 w-3.5" />
                               </button>
                             </div>
-                            <span className="font-medium tabular-nums">
-                              {formatPrice(
-                                parseFloat(line.price) * line.quantity,
-                                line.currencyCode,
-                              )}
-                            </span>
+                            <Price
+                              amount={parseFloat(line.price) * line.quantity}
+                              baseCurrency={line.currencyCode}
+                              className="font-medium tabular-nums"
+                            />
                           </div>
                         </div>
                       </motion.li>
@@ -198,9 +198,7 @@ export function CartDrawer() {
                 <div className="border-t border-[hsl(var(--border))] p-5">
                   <div className="mb-1 flex justify-between text-sm text-[hsl(var(--muted-foreground))]">
                     <span>Sous-total</span>
-                    <span className="tabular-nums">
-                      {formatPrice(subtotal, currency)}
-                    </span>
+                    <Price amount={subtotal} baseCurrency={currency} className="tabular-nums" />
                   </div>
                   <p className="mb-4 text-xs text-[hsl(var(--muted-foreground))]">
                     Taxes et livraison calculées au paiement sécurisé Shopify.

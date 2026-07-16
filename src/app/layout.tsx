@@ -6,6 +6,7 @@ import { resolveTenant } from "@/lib/tenant/registry";
 import { buildBaseMetadata } from "@/lib/seo";
 import { TenantThemeStyle } from "@/components/tenant-theme-style";
 import { Analytics } from "@/components/analytics";
+import { PwaRegister } from "@/components/pwa-register";
 import type { TenantTheme } from "@/lib/tenant/types";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -54,6 +55,7 @@ export default async function RootLayout({
         <TenantThemeStyle theme={tenant.theme} />
         <Providers>{children}</Providers>
         <Analytics integrations={tenant.integrations} />
+        <PwaRegister />
       </body>
     </html>
   );

@@ -5,14 +5,16 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Check, Heart, Minus, Plus, Scale, Share2, Truck } from "lucide-react";
 import type { Product, ProductVariant } from "@/lib/shopify/types";
-import { cn, discountPercent, formatPrice } from "@/lib/utils";
+import { cn, discountPercent } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Price } from "@/components/ui/price";
 import { useCart } from "@/lib/store/cart";
 import { useWishlist } from "@/lib/store/wishlist";
 import { useCompare } from "@/lib/store/compare";
 import { useRecentlyViewed } from "@/lib/store/recently-viewed";
 import { startCheckoutAction } from "@/lib/actions/checkout";
+import { toast } from "@/lib/store/toast";
 
 function matchVariant(
   product: Product,
@@ -72,6 +74,7 @@ export function ProductBuyBox({ product }: { product: Product }) {
       },
       quantity,
     );
+    toast.success("Ajouté au panier", "/cart");
   };
 
   const buyNow = async () => {
@@ -110,14 +113,18 @@ export function ProductBuyBox({ product }: { product: Product }) {
           {product.title}
         </h1>
         <div className="mt-3 flex items-center gap-3">
-          <span className="text-2xl font-semibold tabular-nums">
-            {formatPrice(price.amount, price.currencyCode)}
-          </span>
+          <Price
+            amount={price.amount}
+            baseCurrency={price.currencyCode}
+            className="text-2xl font-semibold tabular-nums"
+          />
           {compareAt && discount && (
             <>
-              <span className="text-lg text-[hsl(var(--muted-foreground))] line-through tabular-nums">
-                {formatPrice(compareAt.amount, compareAt.currencyCode)}
-              </span>
+              <Price
+                amount={compareAt.amount}
+                baseCurrency={compareAt.currencyCode}
+                className="text-lg text-[hsl(var(--muted-foreground))] line-through tabular-nums"
+              />
               <Badge variant="sale">-{discount}%</Badge>
             </>
           )}
