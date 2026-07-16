@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "cdn.shopify.com" },
       { protocol: "https", hostname: "*.myshopify.com" },
+      // Demo catalogue imagery (used only when no Shopify store is connected).
+      { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },
   experimental: {
