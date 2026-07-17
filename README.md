@@ -227,6 +227,18 @@ et pointez-les vers le projet ; `resolveTenant()` route par `host`.
 # 1. Renseignez DATABASE_URL dans .env.local
 # 2. Appliquez le schéma
 npm run db:push        # ou db:generate + db:migrate
+# 3. Créez votre compte Super Admin
+ADMIN_EMAIL=you@example.com ADMIN_PASSWORD='...' npm run seed:admin
+```
+
+**Sécurité (Supabase / API REST publique)** — si votre Postgres est exposé via
+une API REST auto-générée (Supabase expose le schéma `public` avec le rôle
+`anon`), activez Row Level Security pour verrouiller cette API. L'app se
+connecte en direct comme propriétaire (`postgres`) et contourne RLS, donc elle
+reste pleinement fonctionnelle :
+```bash
+psql "$DATABASE_URL" -f scripts/enable-rls.sql
+# (ou collez scripts/enable-rls.sql dans l'éditeur SQL Supabase)
 ```
 
 ---
