@@ -66,7 +66,7 @@ export async function provisionTenant(opts: {
     shopifyStoreDomain: shop,
     shopifyStorefrontToken: storefrontToken,
     shopifyAdminToken: adminToken,
-    shopifyApiVersion: process.env.SHOPIFY_ADMIN_API_VERSION ?? "2025-01",
+    shopifyApiVersion: process.env.SHOPIFY_ADMIN_API_VERSION ?? "2026-01",
     branding: {
       logoUrl: null,
       faviconUrl: null,

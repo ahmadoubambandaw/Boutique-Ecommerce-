@@ -30,7 +30,7 @@ function defaultTenant(): Tenant {
       storeDomain: process.env.SHOPIFY_STORE_DOMAIN ?? "",
       storefrontAccessToken: process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN ?? "",
       adminAccessToken: process.env.SHOPIFY_ADMIN_ACCESS_TOKEN ?? null,
-      apiVersion: process.env.SHOPIFY_STOREFRONT_API_VERSION ?? "2025-01",
+      apiVersion: process.env.SHOPIFY_STOREFRONT_API_VERSION ?? "2026-01",
     },
     branding: {
       logoUrl: null,

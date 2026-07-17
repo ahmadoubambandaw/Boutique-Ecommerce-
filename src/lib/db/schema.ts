@@ -35,7 +35,7 @@ export const tenants = pgTable(
     shopifyStoreDomain: text("shopify_store_domain").notNull(),
     shopifyStorefrontToken: text("shopify_storefront_token").notNull(),
     shopifyAdminToken: text("shopify_admin_token"),
-    shopifyApiVersion: text("shopify_api_version").notNull().default("2025-01"),
+    shopifyApiVersion: text("shopify_api_version").notNull().default("2026-01"),
 
     // Per-tenant configuration blobs.
     branding: jsonb("branding").$type<TenantBranding>().notNull(),

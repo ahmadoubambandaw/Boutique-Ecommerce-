@@ -70,7 +70,7 @@ export function isValidShopDomain(shop: string): boolean {
   return /^[a-zA-Z0-9][a-zA-Z0-9-]*\.myshopify\.com$/.test(shop);
 }
 
-const ADMIN_VERSION = process.env.SHOPIFY_ADMIN_API_VERSION ?? "2025-01";
+const ADMIN_VERSION = process.env.SHOPIFY_ADMIN_API_VERSION ?? "2026-01";
 
 export type ShopInfo = {
   name: string;
