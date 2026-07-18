@@ -4,7 +4,7 @@ import { CartDrawer } from "@/components/cart/cart-drawer";
 import { CompareBar } from "@/components/product/compare-bar";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { Toaster } from "@/components/ui/toaster";
-import { LiveChat } from "@/components/chat/live-chat";
+import { WhatsAppFab } from "@/components/whatsapp-fab";
 import { resolveTenant } from "@/lib/tenant/registry";
 
 /** Storefront shell — the customer-facing chrome (header, footer, cart, …). */
@@ -27,7 +27,7 @@ export default async function StorefrontLayout({
       <CartDrawer />
       <CompareBar />
       <Toaster />
-      <LiveChat />
+      <WhatsAppFab />
     </>
   );
 }
