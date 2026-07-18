@@ -11,6 +11,7 @@ import { Input, Textarea } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { placeOrderAction } from "@/lib/actions/order";
 import { DELIVERY_FEE, FREE_DELIVERY_ABOVE } from "@/lib/commerce/shipping";
+import { MOBILE_MONEY_NUMBER } from "@/lib/contact";
 import type { PaymentMethod } from "@/lib/commerce/types";
 
 export default function CheckoutPage() {
@@ -151,7 +152,8 @@ export default function CheckoutPage() {
               <div>
                 <p className="font-medium">Wave / Orange Money</p>
                 <p className="text-sm text-[hsl(var(--muted-foreground))]">
-                  Nous vous envoyons le numéro pour payer après validation.
+                  Payez au {MOBILE_MONEY_NUMBER} après confirmation de votre
+                  commande par téléphone.
                 </p>
               </div>
             </button>

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { CheckCircle2, Package, Phone, Smartphone, Truck } from "lucide-react";
 import { getOrder } from "@/lib/commerce/repository";
 import { formatPrice } from "@/lib/utils";
+import { MOBILE_MONEY_NUMBER } from "@/lib/contact";
 
 export const dynamic = "force-dynamic";
 
@@ -58,7 +59,7 @@ export default async function OrderConfirmationPage({
             </p>
             <p className="mt-1 text-sm text-[hsl(var(--muted-foreground))]">
               {isMobileMoney
-                ? "Nous vous enverrons le numéro Wave / Orange Money pour régler votre commande après confirmation par téléphone."
+                ? `Réglez votre commande via Wave / Orange Money au ${MOBILE_MONEY_NUMBER}. Nous confirmons par téléphone avant la livraison.`
                 : "Vous réglez en espèces au moment de la réception de votre commande."}
             </p>
           </div>

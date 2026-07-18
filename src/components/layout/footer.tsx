@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { Mail, MapPin, Phone } from "lucide-react";
 import { Newsletter } from "./newsletter";
+import { CONTACT } from "@/lib/contact";
 
 const COLUMNS = [
   {
@@ -30,19 +32,44 @@ const COLUMNS = [
   },
 ];
 
-export function Footer({ storeName = "Boutique" }: { storeName?: string }) {
+export function Footer({ storeName = "GSE" }: { storeName?: string }) {
   return (
     <footer className="mt-24 border-t border-[hsl(var(--border))]">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[1.5fr_repeat(3,1fr)]">
           <div className="max-w-sm">
             <p className="text-2xl font-semibold tracking-tight">
-              {storeName}<span className="text-[hsl(var(--muted-foreground))]">.</span>
+              {storeName}
+              <span className="text-[hsl(var(--brand-red))]">.</span>
+            </p>
+            <p className="mt-2 text-sm font-medium text-[hsl(var(--muted-foreground))]">
+              {CONTACT.tagline}
             </p>
             <p className="mt-3 text-sm text-[hsl(var(--muted-foreground))]">
-              L'expérience d'achat headless, plus rapide et élégante. Recevez nos
-              nouveautés et offres exclusives.
+              Équipements de protection individuelle (EPI) et solutions de
+              sécurité incendie.
             </p>
+            <ul className="mt-4 space-y-2 text-sm text-[hsl(var(--muted-foreground))]">
+              <li>
+                <a
+                  href={`tel:${CONTACT.phoneTel}`}
+                  className="flex items-center gap-2 hover:text-[hsl(var(--foreground))]"
+                >
+                  <Phone className="h-4 w-4" /> {CONTACT.phone}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={`mailto:${CONTACT.email}`}
+                  className="flex items-center gap-2 hover:text-[hsl(var(--foreground))]"
+                >
+                  <Mail className="h-4 w-4" /> {CONTACT.email}
+                </a>
+              </li>
+              <li className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" /> {CONTACT.address}
+              </li>
+            </ul>
             <div className="mt-6 max-w-sm">
               <Newsletter />
             </div>
@@ -69,12 +96,11 @@ export function Footer({ storeName = "Boutique" }: { storeName?: string }) {
 
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-[hsl(var(--border))] pt-8 text-sm text-[hsl(var(--muted-foreground))] sm:flex-row">
           <p>
-            © {new Date().getFullYear()} {storeName}. Propulsé par Shopify &
-            Next.js.
+            © {new Date().getFullYear()} {CONTACT.name}. Tous droits réservés.
           </p>
           <p className="flex items-center gap-2">
             <span className="inline-block h-2 w-2 rounded-full bg-green-500" />
-            Paiement sécurisé
+            Paiement à la livraison & mobile money
           </p>
         </div>
       </div>

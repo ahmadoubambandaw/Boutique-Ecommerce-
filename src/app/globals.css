@@ -4,17 +4,18 @@
    Design tokens — premium, minimalist palette (Apple/Tesla/Zara)
    ───────────────────────────────────────────────────────────── */
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-opensans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
 
   --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(240 10% 4%);
-  --color-muted: hsl(240 5% 96%);
-  --color-muted-foreground: hsl(240 4% 46%);
-  --color-border: hsl(240 6% 90%);
-  --color-accent: hsl(240 6% 10%);
-  --color-accent-foreground: hsl(0 0% 98%);
-  --color-ring: hsl(240 5% 65%);
+  --color-foreground: hsl(214 45% 12%);
+  --color-muted: hsl(214 20% 96%);
+  --color-muted-foreground: hsl(214 8% 45%);
+  --color-border: hsl(214 16% 90%);
+  --color-accent: hsl(214 81% 20%);
+  --color-accent-foreground: hsl(0 0% 100%);
+  --color-brand-red: hsl(358 79% 47%);
+  --color-ring: hsl(214 60% 35%);
 
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
@@ -24,33 +25,35 @@
 
 :root {
   --background: 0 0% 100%;
-  --foreground: 240 10% 4%;
+  --foreground: 214 45% 12%;
   --card: 0 0% 100%;
-  --card-foreground: 240 10% 4%;
-  --muted: 240 5% 96%;
-  --muted-foreground: 240 4% 46%;
-  --border: 240 6% 90%;
-  --input: 240 6% 90%;
-  --accent: 240 6% 10%;
-  --accent-foreground: 0 0% 98%;
-  --ring: 240 5% 65%;
+  --card-foreground: 214 45% 12%;
+  --muted: 214 20% 96%;
+  --muted-foreground: 214 8% 45%;
+  --border: 214 16% 90%;
+  --input: 214 16% 90%;
+  --accent: 214 81% 20%;
+  --accent-foreground: 0 0% 100%;
+  --brand-red: 358 79% 47%;
+  --ring: 214 60% 35%;
   --glass: 255 255 255;
 }
 
 :root[data-theme="dark"],
 .dark {
-  --background: 240 10% 4%;
+  --background: 214 40% 6%;
   --foreground: 0 0% 98%;
-  --card: 240 8% 6%;
+  --card: 214 34% 9%;
   --card-foreground: 0 0% 98%;
-  --muted: 240 4% 12%;
-  --muted-foreground: 240 5% 65%;
-  --border: 240 4% 16%;
-  --input: 240 4% 16%;
-  --accent: 0 0% 98%;
-  --accent-foreground: 240 6% 10%;
-  --ring: 240 5% 45%;
-  --glass: 10 10 12;
+  --muted: 214 24% 14%;
+  --muted-foreground: 214 12% 66%;
+  --border: 214 20% 18%;
+  --input: 214 20% 18%;
+  --accent: 214 70% 58%;
+  --accent-foreground: 0 0% 100%;
+  --brand-red: 358 82% 60%;
+  --ring: 214 60% 55%;
+  --glass: 12 20 34;
 }
 
 @layer base {
@@ -60,11 +63,16 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    /* Per-tenant font (set on <body>); falls back to Geist. */
-    font-family: var(--font-active, var(--font-geist-sans)), ui-sans-serif,
+    /* Body text: Open Sans (brand). */
+    font-family: var(--font-active, var(--font-opensans)), ui-sans-serif,
       system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+  /* Headings: Poppins (brand display font). */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.01em;
   }
   ::selection {
     background-color: hsl(var(--foreground));

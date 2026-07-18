@@ -33,23 +33,23 @@ function defaultTenant(): Tenant {
       apiVersion: process.env.SHOPIFY_STOREFRONT_API_VERSION ?? "2026-01",
     },
     branding: {
-      logoUrl: null,
-      faviconUrl: null,
-      storeName: "Boutique",
-      tagline: "L'e-commerce headless, réinventé.",
+      logoUrl: "/gse-logo.jpg",
+      faviconUrl: "/gse-logo.jpg",
+      storeName: "GSE",
+      tagline: "Votre sécurité, notre engagement.",
     },
     theme: {
-      primary: "240 6% 10%",
-      accent: "240 6% 10%",
+      primary: "214 81% 20%",
+      accent: "214 81% 20%",
       radius: "soft",
       fontFamily: "geist",
-      defaultMode: "system",
+      defaultMode: "light",
     },
     seo: {
-      metaTitle: "Boutique — Headless Commerce Premium",
+      metaTitle: "GSE — Global Safety Équipement",
       metaDescription:
-        "Une expérience d'achat plus rapide, moderne et élégante que les thèmes Shopify classiques.",
-      ogImageUrl: null,
+        "Équipements de protection individuelle (EPI) et solutions de sécurité incendie au Sénégal. Casques, chaussures, gants, extincteurs et plus. Livraison à Dakar, paiement à la livraison ou mobile money.",
+      ogImageUrl: "/gse-logo.jpg",
     },
     integrations: {
       metaPixelId: null,
@@ -59,7 +59,8 @@ function defaultTenant(): Tenant {
     banners: [
       {
         id: "welcome",
-        message: "Livraison offerte dès 50€ — Nouvelle collection disponible",
+        message:
+          "EPI & sécurité incendie — Livraison à Dakar · Paiement à la livraison ou mobile money",
         href: "/products",
         active: true,
       },
