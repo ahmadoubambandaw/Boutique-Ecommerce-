@@ -65,8 +65,10 @@ export default async function BlogPostPage({ params }: Params) {
       <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-3xl">
         <Image src={post.image} alt={post.title} fill priority sizes="(max-width: 768px) 100vw, 768px" className="object-cover" />
       </div>
-      <div className="mt-8 text-lg leading-relaxed text-[hsl(var(--muted-foreground))]">
-        <p>{post.content}</p>
+      <div className="mt-8 space-y-4 text-lg leading-relaxed text-[hsl(var(--muted-foreground))]">
+        {post.content.split("\n\n").map((para, i) => (
+          <p key={i}>{para}</p>
+        ))}
       </div>
     </article>
   );

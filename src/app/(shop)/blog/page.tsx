@@ -8,7 +8,8 @@ import { Reveal } from "@/components/motion/reveal";
 
 export const metadata: Metadata = {
   title: "Blog",
-  description: "Tendances, guides et inspirations mode.",
+  description:
+    "Conseils sécurité, guides EPI et prévention incendie par GSE.",
   alternates: { canonical: "/blog" },
 };
 
