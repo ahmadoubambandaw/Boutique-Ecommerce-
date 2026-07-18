@@ -11,6 +11,7 @@ import {
   upsertProduct,
 } from "@/lib/commerce/repository";
 import { captureError } from "@/lib/monitoring";
+import { isUploadConfigured, uploadImage } from "@/lib/storage";
 import type { NativeImage } from "@/lib/commerce/types";
 import type { OrderStatus } from "@/lib/commerce/types";
 
@@ -128,6 +129,39 @@ export async function saveProductAction(
   } catch (err) {
     captureError(err, { stage: "save-product" });
     return { error: "Une erreur est survenue. Réessayez." };
+  }
+}
+
+export type UploadState = { ok?: boolean; url?: string; error?: string };
+
+/** Upload a product image file and return its public URL. */
+export async function uploadProductImageAction(
+  formData: FormData,
+): Promise<UploadState> {
+  const guard = await requireAdmin();
+  if (guard) return { error: guard.error };
+  if (!isUploadConfigured()) {
+    return {
+      error:
+        "L'upload de fichiers n'est pas encore configuré. Colle un lien d'image en attendant.",
+    };
+  }
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Aucun fichier sélectionné." };
+  }
+  try {
+    const url = await uploadImage(file);
+    return { ok: true, url };
+  } catch (err) {
+    if (err instanceof Error && err.message === "upload-not-configured") {
+      return { error: "Upload non configuré." };
+    }
+    captureError(err, { stage: "upload-image" });
+    return {
+      error:
+        err instanceof Error ? err.message : "Échec de l'upload. Réessayez.",
+    };
   }
 }
 

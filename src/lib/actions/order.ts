@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 import { z } from "zod";
 import { createOrder } from "@/lib/commerce/repository";
 import { captureError } from "@/lib/monitoring";
+import { notifyNewOrder } from "@/lib/notify";
 import { deliveryFeeFor } from "@/lib/commerce/shipping";
 import type { OrderItem, PaymentMethod } from "@/lib/commerce/types";
 
@@ -83,6 +84,10 @@ export async function placeOrderAction(
           "Base de données non configurée. Impossible d'enregistrer la commande.",
       };
     }
+
+    // Notify the merchant (email). Never blocks/fails the order.
+    await notifyNewOrder(order);
+
     return { ok: true, orderId: order.id };
   } catch (err) {
     captureError(err, { stage: "place-order" });
