@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
+import { Heart, Menu, PackageSearch, Search, ShoppingBag, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/store/cart";
 import { useWishlist } from "@/lib/store/wishlist";
@@ -94,11 +94,11 @@ export function Header({ storeName = "Boutique" }: { storeName?: string }) {
               )}
             </Link>
             <Link
-              href="/account"
-              aria-label="Compte"
+              href="/track"
+              aria-label="Suivi de commande"
               className="hidden h-11 w-11 items-center justify-center rounded-full hover:bg-[hsl(var(--muted))] sm:inline-flex"
             >
-              <User className="h-5 w-5" />
+              <PackageSearch className="h-5 w-5" />
             </Link>
             <button
               aria-label="Panier"
@@ -166,11 +166,11 @@ export function Header({ storeName = "Boutique" }: { storeName?: string }) {
                   </Link>
                 ))}
                 <Link
-                  href="/account"
+                  href="/track"
                   onClick={() => setMenuOpen(false)}
                   className="rounded-xl px-4 py-3 text-lg font-medium hover:bg-[hsl(var(--muted))]"
                 >
-                  Mon compte
+                  Suivi de commande
                 </Link>
               </div>
             </motion.nav>
