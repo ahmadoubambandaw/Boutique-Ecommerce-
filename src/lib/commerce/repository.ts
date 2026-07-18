@@ -141,6 +141,21 @@ export async function getNativeCollection(handle: string): Promise<NativeCollect
   return row ? rowToCollection(row) : null;
 }
 
+export async function listNativeCollectionsWithCounts(): Promise<
+  { collection: NativeCollection; count: number }[]
+> {
+  const [cols, all] = await Promise.all([
+    listNativeCollections(),
+    listNativeProducts(),
+  ]);
+  return cols.map((c) => ({
+    collection: c,
+    count: c.productTypeRule
+      ? all.filter((p) => p.productType === c.productTypeRule).length
+      : all.length,
+  }));
+}
+
 export async function getNativeCollectionProducts(
   handle: string,
 ): Promise<NativeProduct[]> {

@@ -1,4 +1,4 @@
-import { listProducts, listCollections } from "@/lib/catalog";
+import { listProducts, listCollectionsWithCounts } from "@/lib/catalog";
 import { resolveTenant } from "@/lib/tenant/registry";
 import { Hero } from "@/components/home/hero";
 import { Features } from "@/components/home/features";
@@ -17,7 +17,7 @@ export default async function HomePage() {
   const [tenant, products, collections] = await Promise.all([
     resolveTenant(),
     listProducts({ first: 8 }),
-    listCollections(),
+    listCollectionsWithCounts(),
   ]);
 
   const trending = products.slice(0, 8);
@@ -45,11 +45,12 @@ export default async function HomePage() {
             title="Nos collections"
             href="/collections"
           />
-          <div className="grid auto-rows-[220px] grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-6">
-            {collections.slice(0, 5).map((collection, i) => (
+          <div className="grid grid-cols-1 gap-4 sm:auto-rows-[220px] sm:grid-cols-4 sm:gap-6">
+            {collections.slice(0, 5).map(({ collection, count }, i) => (
               <CollectionCard
                 key={collection.id}
                 collection={collection}
+                count={count}
                 index={i}
                 large={i === 0}
               />

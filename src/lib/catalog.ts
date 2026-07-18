@@ -11,6 +11,7 @@ import {
   getNativeCollectionProducts,
   getNativeProduct,
   listNativeCollections,
+  listNativeCollectionsWithCounts,
   listNativeProducts,
 } from "@/lib/commerce/repository";
 import { nativeToCollection, nativeToProduct } from "@/lib/commerce/map";
@@ -148,6 +149,20 @@ export async function listCollections(): Promise<Collection[]> {
     }
   }
   return MOCK_COLLECTIONS;
+}
+
+export async function listCollectionsWithCounts(): Promise<
+  { collection: Collection; count: number }[]
+> {
+  const native = await listNativeCollectionsWithCounts().catch(() => []);
+  if (native.length > 0) {
+    return native.map(({ collection, count }) => ({
+      collection: nativeToCollection(collection),
+      count,
+    }));
+  }
+  const collections = await listCollections();
+  return collections.map((collection) => ({ collection, count: 0 }));
 }
 
 export async function getCollection(handle: string): Promise<Collection | null> {
