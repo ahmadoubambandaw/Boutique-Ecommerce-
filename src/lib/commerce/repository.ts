@@ -234,6 +234,16 @@ export async function listOrders(): Promise<Order[]> {
   return rows.map(rowToOrder);
 }
 
+export async function countPendingOrders(): Promise<number> {
+  const db = getDb();
+  if (!db) return 0;
+  const rows = await db
+    .select({ id: orders.id })
+    .from(orders)
+    .where(and(eq(orders.tenantId, TENANT), eq(orders.status, "pending")));
+  return rows.length;
+}
+
 export async function getOrder(id: string): Promise<Order | null> {
   const db = getDb();
   if (!db) return null;

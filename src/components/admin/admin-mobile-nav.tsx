@@ -28,9 +28,11 @@ const NAV = [
 export function AdminMobileNav({
   isSuper,
   hasSession,
+  pendingCount = 0,
 }: {
   isSuper: boolean;
   hasSession: boolean;
+  pendingCount?: number;
 }) {
   const [open, setOpen] = React.useState(false);
   const pathname = usePathname();
@@ -96,6 +98,11 @@ export function AdminMobileNav({
                   >
                     <item.icon className="h-4 w-4" />
                     {item.label}
+                    {item.href === "/admin/orders" && pendingCount > 0 && (
+                      <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[hsl(var(--brand-red))] px-1.5 text-xs font-semibold text-white">
+                        {pendingCount}
+                      </span>
+                    )}
                   </Link>
                 );
               })}

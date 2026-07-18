@@ -11,8 +11,10 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
+import { OrdersWatcher } from "@/components/admin/orders-watcher";
 import { getAdminSession, adminLogoutAction } from "@/lib/auth/admin-actions";
 import { isDbConfigured } from "@/lib/db/client";
+import { countPendingOrders } from "@/lib/commerce/repository";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -39,12 +41,13 @@ export default async function AdminLayout({
   // is browsable; in production the middleware + session enforce real roles.
   const isSuper = session ? session.role === "super_admin" : !isDbConfigured();
   const nav = NAV.filter((item) => !item.superOnly || isSuper);
+  const pendingCount = await countPendingOrders();
 
   return (
     <div className="flex min-h-screen">
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-[hsl(var(--border))] p-4 lg:flex">
         <Link href="/admin" className="mb-8 px-3 py-2 text-lg font-semibold">
-          Boutique<span className="text-[hsl(var(--muted-foreground))]">.admin</span>
+          GSE<span className="text-[hsl(var(--muted-foreground))]">.admin</span>
         </Link>
         <nav className="flex flex-1 flex-col gap-1">
           {nav.map((item) => (
@@ -55,6 +58,11 @@ export default async function AdminLayout({
             >
               <item.icon className="h-4 w-4" />
               {item.label}
+              {item.href === "/admin/orders" && pendingCount > 0 && (
+                <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[hsl(var(--brand-red))] px-1.5 text-xs font-semibold text-white">
+                  {pendingCount}
+                </span>
+              )}
             </Link>
           ))}
         </nav>
@@ -76,15 +84,34 @@ export default async function AdminLayout({
       <div className="flex-1">
         <header className="flex h-16 items-center justify-between border-b border-[hsl(var(--border))] px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-2">
-            <AdminMobileNav isSuper={isSuper} hasSession={Boolean(session)} />
+            <AdminMobileNav
+              isSuper={isSuper}
+              hasSession={Boolean(session)}
+              pendingCount={pendingCount}
+            />
             <span className="truncate text-sm text-[hsl(var(--muted-foreground))]">
               {session
                 ? `Connecté · ${session.email}`
                 : "Mode démo · données de démonstration"}
             </span>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <Link
+              href="/admin/orders"
+              aria-label="Commandes"
+              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full hover:bg-[hsl(var(--muted))]"
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {pendingCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[hsl(var(--brand-red))] px-1 text-[11px] font-semibold text-white">
+                  {pendingCount}
+                </span>
+              )}
+            </Link>
+            <ThemeToggle />
+          </div>
         </header>
+        <OrdersWatcher initialCount={pendingCount} />
         <div className="p-6">{children}</div>
       </div>
     </div>

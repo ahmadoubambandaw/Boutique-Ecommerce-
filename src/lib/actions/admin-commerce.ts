@@ -6,6 +6,7 @@ import { z } from "zod";
 import { getAdminSession } from "@/lib/auth/admin-actions";
 import { isDbConfigured } from "@/lib/db/client";
 import {
+  countPendingOrders,
   deleteProduct,
   updateOrderStatus,
   upsertProduct,
@@ -180,6 +181,13 @@ export async function deleteProductAction(
     captureError(err, { stage: "delete-product" });
     return { error: "Suppression impossible." };
   }
+}
+
+/** Number of orders awaiting processing (for the in-app notification badge). */
+export async function pendingOrdersCountAction(): Promise<number> {
+  const session = await getAdminSession();
+  if (!session && isDbConfigured()) return 0;
+  return countPendingOrders();
 }
 
 const ORDER_STATUSES: OrderStatus[] = [
