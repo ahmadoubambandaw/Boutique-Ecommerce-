@@ -1,4 +1,5 @@
 import "server-only";
+import { randomUUID } from "node:crypto";
 
 /**
  * Image upload to Supabase Storage (public bucket `product-images`).
@@ -61,7 +62,7 @@ export async function uploadImage(file: File): Promise<string> {
 
   const base = supabaseUrl();
   const ext = extFor(file.type, file.name);
-  const path = `${crypto.randomUUID()}.${ext}`;
+  const path = `${randomUUID()}.${ext}`;
   const bytes = new Uint8Array(await file.arrayBuffer());
 
   const res = await fetch(
