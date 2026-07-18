@@ -79,6 +79,12 @@ export function ProductBuyBox({ product }: { product: Product }) {
 
   const buyNow = async () => {
     if (!variant) return;
+    // Local-checkout mode (Wave / Orange Money / COD) → custom checkout page.
+    if (process.env.NEXT_PUBLIC_CHECKOUT_MODE === "local") {
+      addToCart();
+      router.push("/checkout");
+      return;
+    }
     setPending(true);
     const res = await startCheckoutAction([
       { variantId: variant.id, quantity },

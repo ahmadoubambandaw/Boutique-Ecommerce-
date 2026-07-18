@@ -26,6 +26,11 @@ export default function CartPage() {
   const shipping = subtotal >= FREE_SHIPPING || subtotal === 0 ? 0 : 4.9;
 
   async function checkout() {
+    // "local" mode routes to the custom Wave/OM/COD checkout page.
+    if (process.env.NEXT_PUBLIC_CHECKOUT_MODE === "local") {
+      window.location.href = "/checkout";
+      return;
+    }
     setNotice(null);
     setPending(true);
     const res = await startCheckoutAction(

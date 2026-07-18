@@ -63,6 +63,21 @@ export const tenantSettingsSchema = z.object({
 });
 export type TenantSettingsInput = z.infer<typeof tenantSettingsSchema>;
 
+/** Custom local-payment checkout (Senegal: Wave / Orange Money / COD). */
+export const localCheckoutSchema = z.object({
+  name: z.string().min(2, "Nom complet requis").max(80),
+  phone: z
+    .string()
+    .regex(/^(\+?221)?\s?(7[05678])\s?\d{3}\s?\d{2}\s?\d{2}$/, {
+      message: "Numéro sénégalais invalide (ex : 77 123 45 67)",
+    }),
+  city: z.string().min(2, "Ville requise").max(60),
+  address: z.string().min(4, "Adresse requise").max(160),
+  note: z.string().max(300).optional().or(z.literal("")),
+  paymentMethod: z.enum(["mobile_money", "cod"]),
+});
+export type LocalCheckoutInput = z.infer<typeof localCheckoutSchema>;
+
 export const trackOrderSchema = z.object({
   orderNumber: z.string().min(1, "Numéro de commande requis"),
   email: z.string().email("Adresse e-mail invalide"),

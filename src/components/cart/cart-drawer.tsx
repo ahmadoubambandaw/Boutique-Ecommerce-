@@ -13,6 +13,12 @@ import { startCheckoutAction } from "@/lib/actions/checkout";
 
 const FREE_SHIPPING_THRESHOLD = 50;
 
+/**
+ * "local" → custom checkout page (Wave / Orange Money / COD, West Africa).
+ * default → Shopify hosted checkout.
+ */
+const LOCAL_CHECKOUT = process.env.NEXT_PUBLIC_CHECKOUT_MODE === "local";
+
 export function CartDrawer() {
   const { lines, isOpen, setOpen, updateQuantity, remove } = useCart();
   const [pending, setPending] = React.useState(false);
@@ -27,6 +33,11 @@ export function CartDrawer() {
   const progress = Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100);
 
   async function checkout() {
+    if (LOCAL_CHECKOUT) {
+      setOpen(false);
+      window.location.href = "/checkout";
+      return;
+    }
     setNotice(null);
     setPending(true);
     const res = await startCheckoutAction(
