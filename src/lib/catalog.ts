@@ -6,19 +6,24 @@ import {
   MOCK_PRODUCTS,
   mockSearch,
 } from "@/lib/mock/data";
+import {
+  getNativeCollection,
+  getNativeCollectionProducts,
+  getNativeProduct,
+  listNativeCollections,
+  listNativeProducts,
+} from "@/lib/commerce/repository";
+import { nativeToCollection, nativeToProduct } from "@/lib/commerce/map";
 import type { Collection, Product } from "@/lib/shopify/types";
 
 /**
- * App-facing catalogue facade.
- *
- * Pages call these instead of the raw Shopify service. When live Shopify
- * credentials are present we always hit Shopify (single source of truth); when
- * they're absent — or a request fails — we degrade gracefully to the demo
- * catalogue so the storefront never renders broken. This keeps the mock data
- * fully isolated from the production data path.
+ * App-facing catalogue facade. Source priority:
+ *   1. Native DB (our own products in Supabase — no Shopify, no fees)
+ *   2. Shopify Storefront API (if credentials are set and DB is empty)
+ *   3. Demo/mock data (so the storefront never renders broken)
  */
 
-async function hasCreds(): Promise<boolean> {
+async function hasShopify(): Promise<boolean> {
   const t = await resolveTenant();
   return Boolean(t.shopify.storeDomain && t.shopify.storefrontAccessToken);
 }
@@ -56,7 +61,25 @@ export async function listProducts(opts?: {
   query?: string;
   first?: number;
 }): Promise<Product[]> {
-  if (await hasCreds()) {
+  // 1. Native DB
+  const native = await listNativeProducts().catch(() => []);
+  if (native.length > 0) {
+    let list = native.map(nativeToProduct);
+    if (opts?.query) {
+      const q = opts.query.toLowerCase();
+      list = list.filter(
+        (p) =>
+          p.title.toLowerCase().includes(q) ||
+          p.vendor.toLowerCase().includes(q) ||
+          p.productType.toLowerCase().includes(q),
+      );
+    }
+    list = bySort(list, opts?.sort);
+    return opts?.first ? list.slice(0, opts.first) : list;
+  }
+
+  // 2. Shopify
+  if (await hasShopify()) {
     try {
       const { products } = await shopify.getProducts({
         sort: opts?.sort,
@@ -65,16 +88,21 @@ export async function listProducts(opts?: {
       });
       if (products.length) return products;
     } catch {
-      /* fall through to demo data */
+      /* fall through */
     }
   }
+
+  // 3. Demo
   let list = opts?.query ? mockSearch(opts.query) : MOCK_PRODUCTS;
   list = bySort(list, opts?.sort);
   return opts?.first ? list.slice(0, opts.first) : list;
 }
 
 export async function getProduct(handle: string): Promise<Product | null> {
-  if (await hasCreds()) {
+  const native = await getNativeProduct(handle).catch(() => null);
+  if (native) return nativeToProduct(native);
+
+  if (await hasShopify()) {
     try {
       const product = await shopify.getProduct(handle);
       if (product) return product;
@@ -89,7 +117,14 @@ export async function getRecommendations(
   productId: string,
   handle: string,
 ): Promise<Product[]> {
-  if (await hasCreds()) {
+  const native = await listNativeProducts().catch(() => []);
+  if (native.length > 0) {
+    return native
+      .filter((p) => p.handle !== handle)
+      .slice(0, 4)
+      .map(nativeToProduct);
+  }
+  if (await hasShopify()) {
     try {
       const recs = await shopify.getProductRecommendations(productId);
       if (recs.length) return recs.slice(0, 4);
@@ -101,7 +136,10 @@ export async function getRecommendations(
 }
 
 export async function listCollections(): Promise<Collection[]> {
-  if (await hasCreds()) {
+  const native = await listNativeCollections().catch(() => []);
+  if (native.length > 0) return native.map(nativeToCollection);
+
+  if (await hasShopify()) {
     try {
       const collections = await shopify.getCollections();
       if (collections.length) return collections;
@@ -113,7 +151,10 @@ export async function listCollections(): Promise<Collection[]> {
 }
 
 export async function getCollection(handle: string): Promise<Collection | null> {
-  if (await hasCreds()) {
+  const native = await getNativeCollection(handle).catch(() => null);
+  if (native) return nativeToCollection(native);
+
+  if (await hasShopify()) {
     try {
       const collection = await shopify.getCollection(handle);
       if (collection) return collection;
@@ -128,7 +169,13 @@ export async function getCollectionProducts(
   handle: string,
   sort?: string,
 ): Promise<Product[]> {
-  if (await hasCreds()) {
+  const nativeCol = await getNativeCollection(handle).catch(() => null);
+  if (nativeCol) {
+    const items = await getNativeCollectionProducts(handle);
+    return bySort(items.map(nativeToProduct), sort);
+  }
+
+  if (await hasShopify()) {
     try {
       const { products } = await shopify.getCollectionProducts({ handle, sort });
       if (products.length) return products;
@@ -136,7 +183,6 @@ export async function getCollectionProducts(
       /* fall through */
     }
   }
-  // Demo: everything belongs to the collection, just sorted.
   return bySort(MOCK_PRODUCTS, sort);
 }
 

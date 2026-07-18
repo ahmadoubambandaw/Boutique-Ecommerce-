@@ -13,7 +13,6 @@ import { useCart } from "@/lib/store/cart";
 import { useWishlist } from "@/lib/store/wishlist";
 import { useCompare } from "@/lib/store/compare";
 import { useRecentlyViewed } from "@/lib/store/recently-viewed";
-import { startCheckoutAction } from "@/lib/actions/checkout";
 import { toast } from "@/lib/store/toast";
 
 function matchVariant(
@@ -38,7 +37,6 @@ export function ProductBuyBox({ product }: { product: Product }) {
     ),
   );
   const [quantity, setQuantity] = React.useState(1);
-  const [pending, setPending] = React.useState(false);
   const [shared, setShared] = React.useState(false);
 
   const variant = matchVariant(product, selected) ?? product.variants[0];
@@ -77,25 +75,21 @@ export function ProductBuyBox({ product }: { product: Product }) {
     toast.success("Ajouté au panier", "/cart");
   };
 
-  const buyNow = async () => {
+  const buyNow = () => {
     if (!variant) return;
-    // Local-checkout mode (Wave / Orange Money / COD) → custom checkout page.
-    if (process.env.NEXT_PUBLIC_CHECKOUT_MODE === "local") {
-      addToCart();
-      router.push("/checkout");
-      return;
-    }
-    setPending(true);
-    const res = await startCheckoutAction([
-      { variantId: variant.id, quantity },
-    ]);
-    if (res.ok && res.checkoutUrl) {
-      window.location.href = res.checkoutUrl;
-      return;
-    }
-    // Demo fallback: add to cart and open cart drawer.
-    addToCart();
-    setPending(false);
+    add(
+      {
+        variantId: variant.id,
+        handle: product.handle,
+        title: product.title,
+        variantTitle: variant.title,
+        image: product.featuredImage?.url ?? null,
+        price: variant.price.amount,
+        currencyCode: variant.price.currencyCode,
+      },
+      quantity,
+    );
+    router.push("/checkout");
   };
 
   const share = async () => {
@@ -227,9 +221,9 @@ export function ProductBuyBox({ product }: { product: Product }) {
         size="lg"
         className="w-full"
         onClick={buyNow}
-        disabled={!available || pending}
+        disabled={!available}
       >
-        {pending ? "Redirection…" : "Acheter maintenant"}
+        Acheter maintenant
       </Button>
 
       {/* Secondary actions */}
@@ -284,7 +278,7 @@ export function ProductBuyBox({ product }: { product: Product }) {
         className="flex items-center gap-2 rounded-2xl border border-[hsl(var(--border))] p-4 text-sm text-[hsl(var(--muted-foreground))]"
       >
         <Truck className="h-5 w-5 shrink-0" />
-        Livraison offerte dès 50€ · Retours gratuits sous 30 jours
+        Paiement à la livraison · Livraison offerte dès 25 000 FCFA
       </motion.div>
     </div>
   );

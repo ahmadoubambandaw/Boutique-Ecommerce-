@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Building2, LayoutDashboard, LogOut, Package, Settings } from "lucide-react";
+import {
+  Building2,
+  LayoutDashboard,
+  LogOut,
+  Package,
+  Settings,
+  ShoppingCart,
+} from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { getAdminSession, adminLogoutAction } from "@/lib/auth/admin-actions";
 import { isDbConfigured } from "@/lib/db/client";
@@ -13,6 +20,7 @@ export const metadata: Metadata = {
 const NAV = [
   { label: "Vue d'ensemble", href: "/admin", icon: LayoutDashboard, superOnly: false },
   { label: "Produits", href: "/admin/products", icon: Package, superOnly: false },
+  { label: "Commandes", href: "/admin/orders", icon: ShoppingCart, superOnly: false },
   { label: "Super Admin", href: "/admin/super", icon: Building2, superOnly: true },
   { label: "Paramètres", href: "/admin/settings", icon: Settings, superOnly: false },
 ];

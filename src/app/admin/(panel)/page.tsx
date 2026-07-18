@@ -18,6 +18,10 @@ const STATUS_LABELS: Record<string, string> = {
   in_progress: "En cours",
   on_hold: "En attente",
   scheduled: "Planifiée",
+  // Native order statuses
+  pending: "En attente",
+  confirmed: "Confirmée",
+  cancelled: "Annulée",
 };
 
 function statusLabel(status: string): string {
@@ -33,13 +37,19 @@ export default async function AdminDashboard() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Vue d'ensemble</h1>
           <p className="text-sm text-[hsl(var(--muted-foreground))]">
-            {m.source === "shopify"
-              ? "Données en temps réel depuis Shopify (90 derniers jours)."
-              : "Indicateurs clés de votre boutique."}
+            {m.source === "native"
+              ? "Données en temps réel de vos commandes."
+              : m.source === "shopify"
+                ? "Données en temps réel depuis Shopify (90 derniers jours)."
+                : "Indicateurs clés de votre boutique."}
           </p>
         </div>
-        <Badge variant={m.source === "shopify" ? "default" : "muted"}>
-          {m.source === "shopify" ? "Shopify · live" : "Démo"}
+        <Badge variant={m.source === "demo" ? "muted" : "default"}>
+          {m.source === "native"
+            ? "Live"
+            : m.source === "shopify"
+              ? "Shopify · live"
+              : "Démo"}
         </Badge>
       </div>
 

@@ -3,6 +3,7 @@ import { resolveTenant } from "@/lib/tenant/registry";
 import { adminFetch, hasAdminApi } from "@/lib/shopify/admin";
 import { MOCK_PRODUCTS } from "@/lib/mock/data";
 import { MOCK_ORDERS } from "@/lib/mock/orders";
+import { listOrders } from "@/lib/commerce/repository";
 
 /**
  * Read-only store analytics for the merchant dashboard.
@@ -22,7 +23,7 @@ export type DashboardMetrics = {
   visitorsChange: number | null;
   conversionRate: number | null;
   currency: string;
-  source: "shopify" | "demo";
+  source: "native" | "shopify" | "demo";
   revenueSeries: { label: string; value: number }[];
   topProducts: { title: string; units: number; revenue: number; image: string | null }[];
   recentOrders: {
@@ -168,6 +169,75 @@ async function getShopifyMetrics(): Promise<DashboardMetrics | null> {
   };
 }
 
+/** Real metrics computed from our own (native) orders in Postgres. */
+async function getNativeMetrics(): Promise<DashboardMetrics | null> {
+  const orders = await listOrders().catch(() => []);
+  if (orders.length === 0) return null;
+
+  const currency = orders[0]?.currency ?? "XOF";
+  const paid = orders.filter((o) => o.status !== "cancelled");
+
+  const series = Array.from({ length: WEEKS }, (_, i) => ({
+    label: `S${i + 1}`,
+    value: 0,
+  }));
+  const now = Date.now();
+  let revenue = 0;
+  for (const o of paid) {
+    revenue += o.total;
+    const ageDays =
+      (now - new Date(o.createdAt).getTime()) / (24 * 60 * 60 * 1000);
+    const weekIndex = WEEKS - 1 - Math.min(WEEKS - 1, Math.floor(ageDays / 7));
+    if (series[weekIndex]) series[weekIndex].value += Math.round(o.total);
+  }
+
+  const productMap = new Map<
+    string,
+    { units: number; revenue: number; image: string | null }
+  >();
+  for (const o of paid) {
+    for (const item of o.items) {
+      const entry =
+        productMap.get(item.title) ?? {
+          units: 0,
+          revenue: 0,
+          image: item.image,
+        };
+      entry.units += item.quantity;
+      entry.revenue += item.price * item.quantity;
+      if (!entry.image && item.image) entry.image = item.image;
+      productMap.set(item.title, entry);
+    }
+  }
+  const topProducts = [...productMap.entries()]
+    .map(([title, v]) => ({ title, ...v }))
+    .sort((a, b) => b.units - a.units)
+    .slice(0, 5);
+
+  const recentOrders = orders.slice(0, 8).map((o) => ({
+    number: `#${o.orderNumber}`,
+    customer: o.address.fullName,
+    total: o.total,
+    status: o.status,
+    date: o.createdAt,
+  }));
+
+  return {
+    revenue: Math.round(revenue),
+    revenueChange: null,
+    orders: orders.length,
+    ordersChange: null,
+    visitors: null,
+    visitorsChange: null,
+    conversionRate: null,
+    currency,
+    source: "native",
+    revenueSeries: series,
+    topProducts,
+    recentOrders,
+  };
+}
+
 function getDemoMetrics(): DashboardMetrics {
   const revenueSeries = Array.from({ length: WEEKS }, (_, i) => ({
     label: `S${i + 1}`,
@@ -207,6 +277,10 @@ function getDemoMetrics(): DashboardMetrics {
 }
 
 export async function getDashboardMetrics(): Promise<DashboardMetrics> {
+  // 1. Our own orders (native DB) take priority — this is the real store data.
+  const native = await getNativeMetrics();
+  if (native) return native;
+
   await resolveTenant();
   if (await hasAdminApi()) {
     try {

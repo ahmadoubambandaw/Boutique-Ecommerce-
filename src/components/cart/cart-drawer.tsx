@@ -5,54 +5,28 @@ import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/utils";
 import { Price } from "@/components/ui/price";
 import { Button } from "@/components/ui/button";
-import { startCheckoutAction } from "@/lib/actions/checkout";
-
-const FREE_SHIPPING_THRESHOLD = 50;
-
-/**
- * "local" → custom checkout page (Wave / Orange Money / COD, West Africa).
- * default → Shopify hosted checkout.
- */
-const LOCAL_CHECKOUT = process.env.NEXT_PUBLIC_CHECKOUT_MODE === "local";
+import { FREE_DELIVERY_ABOVE } from "@/lib/commerce/shipping";
 
 export function CartDrawer() {
+  const router = useRouter();
   const { lines, isOpen, setOpen, updateQuantity, remove } = useCart();
-  const [pending, setPending] = React.useState(false);
-  const [notice, setNotice] = React.useState<string | null>(null);
 
   const subtotal = lines.reduce(
     (n, l) => n + parseFloat(l.price) * l.quantity,
     0,
   );
-  const currency = lines[0]?.currencyCode ?? "EUR";
-  const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
-  const progress = Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100);
+  const currency = lines[0]?.currencyCode ?? "XOF";
+  const remaining = Math.max(0, FREE_DELIVERY_ABOVE - subtotal);
+  const progress = Math.min(100, (subtotal / FREE_DELIVERY_ABOVE) * 100);
 
-  async function checkout() {
-    if (LOCAL_CHECKOUT) {
-      setOpen(false);
-      window.location.href = "/checkout";
-      return;
-    }
-    setNotice(null);
-    setPending(true);
-    const res = await startCheckoutAction(
-      lines.map((l) => ({ variantId: l.variantId, quantity: l.quantity })),
-    );
-    setPending(false);
-    if (res.ok && res.checkoutUrl) {
-      window.location.href = res.checkoutUrl;
-    } else if (res.error === "no-shopify") {
-      setNotice(
-        "Mode démo : connectez une boutique Shopify pour finaliser le paiement sécurisé.",
-      );
-    } else {
-      setNotice("Impossible de démarrer le paiement. Réessayez.");
-    }
+  function checkout() {
+    setOpen(false);
+    router.push("/checkout");
   }
 
   return (
@@ -212,20 +186,11 @@ export function CartDrawer() {
                     <Price amount={subtotal} baseCurrency={currency} className="tabular-nums" />
                   </div>
                   <p className="mb-4 text-xs text-[hsl(var(--muted-foreground))]">
-                    Taxes et livraison calculées au paiement sécurisé Shopify.
+                    Livraison calculée à la commande — paiement à la livraison ou
+                    par mobile money.
                   </p>
-                  {notice && (
-                    <p className="mb-3 rounded-xl bg-[hsl(var(--muted))] px-3 py-2 text-xs">
-                      {notice}
-                    </p>
-                  )}
-                  <Button
-                    className="w-full"
-                    size="lg"
-                    onClick={checkout}
-                    disabled={pending}
-                  >
-                    {pending ? "Redirection…" : "Passer au paiement"}
+                  <Button className="w-full" size="lg" onClick={checkout}>
+                    Passer au paiement
                   </Button>
                 </div>
               </>

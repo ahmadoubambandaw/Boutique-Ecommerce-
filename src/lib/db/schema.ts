@@ -1,8 +1,11 @@
 import {
   boolean,
   index,
+  integer,
   jsonb,
+  numeric,
   pgTable,
+  serial,
   text,
   timestamp,
   uniqueIndex,
@@ -16,6 +19,15 @@ import type {
   TenantSeo,
   TenantTheme,
 } from "@/lib/tenant/types";
+import type {
+  NativeImage,
+  NativeOption,
+  NativeVariant,
+  OrderAddress,
+  OrderItem,
+  OrderStatus,
+  PaymentMethod,
+} from "@/lib/commerce/types";
 
 /**
  * Tenant registry — stores ONLY each merchant's configuration and the
@@ -114,3 +126,80 @@ export const oauthStates = pgTable("oauth_states", {
 export type TenantRow = typeof tenants.$inferSelect;
 export type NewTenantRow = typeof tenants.$inferInsert;
 export type AdminUserRow = typeof adminUsers.$inferSelect;
+
+/* ─────────────────────────────────────────────────────────────
+   Native commerce — our OWN catalogue & orders (no Shopify).
+   ───────────────────────────────────────────────────────────── */
+
+export const products = pgTable(
+  "products",
+  {
+    id: text("id").primaryKey(),
+    tenantId: text("tenant_id").notNull().default("default"),
+    handle: text("handle").notNull(),
+    title: text("title").notNull(),
+    description: text("description").notNull().default(""),
+    price: numeric("price", { precision: 12, scale: 2 }).notNull(),
+    compareAtPrice: numeric("compare_at_price", { precision: 12, scale: 2 }),
+    currency: text("currency").notNull().default("XOF"),
+    vendor: text("vendor").notNull().default(""),
+    productType: text("product_type").notNull().default(""),
+    tags: jsonb("tags").$type<string[]>().notNull().default([]),
+    images: jsonb("images").$type<NativeImage[]>().notNull().default([]),
+    options: jsonb("options").$type<NativeOption[]>().notNull().default([]),
+    variants: jsonb("variants").$type<NativeVariant[]>().notNull().default([]),
+    available: boolean("available").notNull().default(true),
+    featured: boolean("featured").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    handleIdx: uniqueIndex("products_tenant_handle_idx").on(t.tenantId, t.handle),
+    typeIdx: index("products_type_idx").on(t.productType),
+  }),
+);
+
+export const collections = pgTable(
+  "collections",
+  {
+    id: text("id").primaryKey(),
+    tenantId: text("tenant_id").notNull().default("default"),
+    handle: text("handle").notNull(),
+    title: text("title").notNull(),
+    description: text("description").notNull().default(""),
+    image: jsonb("image").$type<NativeImage | null>(),
+    productTypeRule: text("product_type_rule"),
+    position: integer("position").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    handleIdx: uniqueIndex("collections_tenant_handle_idx").on(t.tenantId, t.handle),
+  }),
+);
+
+export const orders = pgTable(
+  "orders",
+  {
+    id: text("id").primaryKey(),
+    tenantId: text("tenant_id").notNull().default("default"),
+    orderNumber: serial("order_number").notNull(),
+    items: jsonb("items").$type<OrderItem[]>().notNull(),
+    address: jsonb("address").$type<OrderAddress>().notNull(),
+    subtotal: numeric("subtotal", { precision: 12, scale: 2 }).notNull(),
+    deliveryFee: numeric("delivery_fee", { precision: 12, scale: 2 }).notNull().default("0"),
+    total: numeric("total", { precision: 12, scale: 2 }).notNull(),
+    currency: text("currency").notNull().default("XOF"),
+    paymentMethod: text("payment_method").$type<PaymentMethod>().notNull(),
+    status: text("status").$type<OrderStatus>().notNull().default("pending"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    tenantIdx: index("orders_tenant_idx").on(t.tenantId),
+    createdIdx: index("orders_created_idx").on(t.createdAt),
+  }),
+);
+
+export type ProductRow = typeof products.$inferSelect;
+export type NewProductRow = typeof products.$inferInsert;
+export type CollectionRow = typeof collections.$inferSelect;
+export type OrderRow = typeof orders.$inferSelect;

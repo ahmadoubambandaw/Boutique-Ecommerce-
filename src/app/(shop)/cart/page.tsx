@@ -4,48 +4,28 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { startCheckoutAction } from "@/lib/actions/checkout";
-
-const FREE_SHIPPING = 50;
+import { DELIVERY_FEE, FREE_DELIVERY_ABOVE } from "@/lib/commerce/shipping";
 
 export default function CartPage() {
+  const router = useRouter();
   const { lines, updateQuantity, remove } = useCart();
-  const [pending, setPending] = React.useState(false);
-  const [notice, setNotice] = React.useState<string | null>(null);
   const [promo, setPromo] = React.useState("");
 
   const subtotal = lines.reduce(
     (n, l) => n + parseFloat(l.price) * l.quantity,
     0,
   );
-  const currency = lines[0]?.currencyCode ?? "EUR";
-  const shipping = subtotal >= FREE_SHIPPING || subtotal === 0 ? 0 : 4.9;
+  const currency = lines[0]?.currencyCode ?? "XOF";
+  const shipping =
+    subtotal >= FREE_DELIVERY_ABOVE || subtotal === 0 ? 0 : DELIVERY_FEE;
 
-  async function checkout() {
-    // "local" mode routes to the custom Wave/OM/COD checkout page.
-    if (process.env.NEXT_PUBLIC_CHECKOUT_MODE === "local") {
-      window.location.href = "/checkout";
-      return;
-    }
-    setNotice(null);
-    setPending(true);
-    const res = await startCheckoutAction(
-      lines.map((l) => ({ variantId: l.variantId, quantity: l.quantity })),
-    );
-    setPending(false);
-    if (res.ok && res.checkoutUrl) {
-      window.location.href = res.checkoutUrl;
-    } else if (res.error === "no-shopify") {
-      setNotice(
-        "Mode démo : connectez une boutique Shopify pour finaliser le paiement sécurisé.",
-      );
-    } else {
-      setNotice("Impossible de démarrer le paiement.");
-    }
+  function checkout() {
+    router.push("/checkout");
   }
 
   if (lines.length === 0) {
@@ -165,20 +145,10 @@ export default function CartPage() {
             </div>
           </dl>
           <p className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">
-            Taxes calculées au paiement Shopify sécurisé.
+            Paiement à la livraison ou par mobile money (Wave / Orange Money).
           </p>
-          {notice && (
-            <p className="mt-3 rounded-xl bg-[hsl(var(--muted))] px-3 py-2 text-xs">
-              {notice}
-            </p>
-          )}
-          <Button
-            className="mt-4 w-full"
-            size="lg"
-            onClick={checkout}
-            disabled={pending}
-          >
-            {pending ? "Redirection…" : "Passer commande"}
+          <Button className="mt-4 w-full" size="lg" onClick={checkout}>
+            Passer commande
           </Button>
         </aside>
       </div>

@@ -5,11 +5,10 @@ import { ShopifyError } from "./client";
 /**
  * Shopify Admin GraphQL API client (server-only).
  *
- * Used for merchant-facing reads the Storefront API can't provide (order
- * analytics, revenue, fulfillment lookups) and for writing orders from the
- * local-payment checkout (lib/shopify/orders.ts). Scoped to the active
- * tenant's offline admin token. We never mutate the CATALOGUE — products stay
- * managed in Shopify, the single source of truth.
+ * Used for merchant-facing reads the Storefront API can't provide: order
+ * analytics, revenue, fulfillment lookups. Scoped to the active tenant's
+ * offline admin token. This is READ-ONLY in our app — we never mutate the
+ * catalogue; Shopify remains the single source of truth.
  */
 
 type AdminCreds = { storeDomain: string; adminToken: string; apiVersion: string };
