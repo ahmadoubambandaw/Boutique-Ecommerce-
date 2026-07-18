@@ -1,11 +1,11 @@
-import { Truck, RefreshCw, ShieldCheck, Sparkles } from "lucide-react";
+import { Truck, BadgeCheck, Banknote, Headphones } from "lucide-react";
 import { Reveal } from "@/components/motion/reveal";
 
 const FEATURES = [
-  { icon: Truck, title: "Livraison offerte", desc: "Dès 50€ d'achat, partout en France." },
-  { icon: RefreshCw, title: "Retours 30 jours", desc: "Échange et remboursement simples." },
-  { icon: ShieldCheck, title: "Paiement sécurisé", desc: "Checkout Shopify chiffré." },
-  { icon: Sparkles, title: "Qualité premium", desc: "Sélection exigeante et durable." },
+  { icon: Truck, title: "Livraison à Dakar", desc: "Livraison rapide dans la région de Dakar." },
+  { icon: BadgeCheck, title: "Équipements certifiés", desc: "Conformes aux normes EN / ISO en vigueur." },
+  { icon: Banknote, title: "Paiement à la livraison", desc: "Ou par mobile money (Wave / Orange Money)." },
+  { icon: Headphones, title: "Conseil expert", desc: "Un accompagnement adapté à vos besoins." },
 ];
 
 export function Features() {

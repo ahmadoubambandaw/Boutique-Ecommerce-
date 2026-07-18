@@ -18,7 +18,10 @@ export default async function StorefrontLayout({
   return (
     <>
       <AnnouncementBar banners={tenant.banners} />
-      <Header storeName={tenant.branding.storeName} />
+      <Header
+        storeName={tenant.branding.storeName}
+        logoUrl={tenant.branding.logoUrl}
+      />
       <main className="min-h-[70vh]">{children}</main>
       <Footer storeName={tenant.branding.storeName} />
       <CartDrawer />

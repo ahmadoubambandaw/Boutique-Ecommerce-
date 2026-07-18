@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { Heart, Menu, PackageSearch, Search, ShoppingBag, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,7 +22,13 @@ const NAV: { key: TranslationKey; href: string }[] = [
   { key: "nav.about", href: "/about" },
 ];
 
-export function Header({ storeName = "Boutique" }: { storeName?: string }) {
+export function Header({
+  storeName = "GSE",
+  logoUrl = null,
+}: {
+  storeName?: string;
+  logoUrl?: string | null;
+}) {
   const [scrolled, setScrolled] = React.useState(false);
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
@@ -55,9 +62,20 @@ export function Header({ storeName = "Boutique" }: { storeName?: string }) {
             >
               <Menu className="h-5 w-5" />
             </button>
-            <Link href="/" className="text-xl font-semibold tracking-tight">
-              {storeName}
-              <span className="text-[hsl(var(--muted-foreground))]">.</span>
+            <Link href="/" className="flex items-center gap-2" aria-label={storeName}>
+              {logoUrl && (
+                <Image
+                  src={logoUrl}
+                  alt={storeName}
+                  width={40}
+                  height={40}
+                  priority
+                  className="h-10 w-10 rounded-md object-contain"
+                />
+              )}
+              <span className="text-xl font-bold tracking-tight">
+                {storeName}
+              </span>
             </Link>
           </div>
 

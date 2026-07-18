@@ -23,12 +23,12 @@ export function Hero({ tagline }: { tagline: string }) {
       {/* Ambient gradient blobs */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <motion.div
-          className="absolute -left-40 top-0 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-indigo-400/20 to-purple-500/10 blur-3xl"
+          className="absolute -left-40 top-0 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-blue-700/20 to-blue-500/10 blur-3xl"
           animate={{ x: [0, 40, 0], y: [0, 30, 0] }}
           transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute -right-32 bottom-0 h-[420px] w-[420px] rounded-full bg-gradient-to-tr from-rose-400/20 to-orange-400/10 blur-3xl"
+          className="absolute -right-32 bottom-0 h-[420px] w-[420px] rounded-full bg-gradient-to-tr from-red-600/20 to-rose-500/10 blur-3xl"
           animate={{ x: [0, -30, 0], y: [0, -40, 0] }}
           transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
         />
@@ -46,14 +46,14 @@ export function Hero({ tagline }: { tagline: string }) {
             className="glass inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium tracking-wide"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-            Nouvelle collection · Automne / Hiver
+            EPI & sécurité incendie · Livraison à Dakar
           </motion.span>
 
           <motion.h1
             variants={item}
             className="mt-6 text-balance text-5xl font-semibold leading-[1.05] tracking-tight sm:text-7xl lg:text-8xl"
           >
-            L'élégance, <br />
+            La sécurité, <br />
             <span className="text-[hsl(var(--muted-foreground))]">
               sans compromis.
             </span>
@@ -63,8 +63,9 @@ export function Hero({ tagline }: { tagline: string }) {
             variants={item}
             className="mt-6 max-w-xl text-balance text-lg text-[hsl(var(--muted-foreground))]"
           >
-            {tagline} Une sélection pointue, une expérience d'achat plus rapide
-            et plus fluide que jamais.
+            {tagline} Équipements de protection individuelle et solutions de
+            sécurité incendie certifiés, pour les professionnels et les
+            entreprises.
           </motion.p>
 
           <motion.div variants={item} className="mt-10 flex flex-wrap gap-4">

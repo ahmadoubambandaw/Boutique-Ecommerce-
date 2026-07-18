@@ -61,7 +61,7 @@ export default async function HomePage() {
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Sélection"
-          title="Tendances du moment"
+          title="Produits populaires"
           href="/products"
         />
         <ProductGrid products={trending} />
@@ -71,13 +71,14 @@ export default async function HomePage() {
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="relative overflow-hidden rounded-3xl bg-[hsl(var(--accent))] px-8 py-20 text-center text-[hsl(var(--accent-foreground))] sm:py-28">
           <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-5xl">
-            Conçu pour durer.
+            Protéger. Prévenir.
             <br />
-            Pensé pour vous.
+            Sécuriser.
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-balance opacity-80">
-            Des matières nobles, un savoir-faire d'exception et une empreinte
-            responsable. La mode telle qu'elle devrait être.
+            Des équipements certifiés, conformes aux normes, et un
+            accompagnement expert pour la sécurité de vos équipes et de vos
+            locaux.
           </p>
         </div>
       </section>
