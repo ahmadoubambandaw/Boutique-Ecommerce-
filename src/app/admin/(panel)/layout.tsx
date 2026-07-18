@@ -10,6 +10,7 @@ import {
   UserCog,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
 import { getAdminSession, adminLogoutAction } from "@/lib/auth/admin-actions";
 import { isDbConfigured } from "@/lib/db/client";
 
@@ -73,12 +74,15 @@ export default async function AdminLayout({
       </aside>
 
       <div className="flex-1">
-        <header className="flex h-16 items-center justify-between border-b border-[hsl(var(--border))] px-6">
-          <span className="text-sm text-[hsl(var(--muted-foreground))]">
-            {session
-              ? `Connecté · ${session.email}`
-              : "Mode démo · données de démonstration"}
-          </span>
+        <header className="flex h-16 items-center justify-between border-b border-[hsl(var(--border))] px-4 sm:px-6">
+          <div className="flex min-w-0 items-center gap-2">
+            <AdminMobileNav isSuper={isSuper} hasSession={Boolean(session)} />
+            <span className="truncate text-sm text-[hsl(var(--muted-foreground))]">
+              {session
+                ? `Connecté · ${session.email}`
+                : "Mode démo · données de démonstration"}
+            </span>
+          </div>
           <ThemeToggle />
         </header>
         <div className="p-6">{children}</div>
