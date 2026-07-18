@@ -7,6 +7,7 @@ import {
   Package,
   Settings,
   ShoppingCart,
+  UserCog,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { getAdminSession, adminLogoutAction } from "@/lib/auth/admin-actions";
@@ -22,6 +23,7 @@ const NAV = [
   { label: "Produits", href: "/admin/products", icon: Package, superOnly: false },
   { label: "Commandes", href: "/admin/orders", icon: ShoppingCart, superOnly: false },
   { label: "Super Admin", href: "/admin/super", icon: Building2, superOnly: true },
+  { label: "Mon compte", href: "/admin/account", icon: UserCog, superOnly: false },
   { label: "Paramètres", href: "/admin/settings", icon: Settings, superOnly: false },
 ];
 
