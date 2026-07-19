@@ -76,30 +76,30 @@ export function Hero({ tagline }: { tagline: string }) {
                 <Image
                   src="/hero-shoe.png"
                   alt="Chaussures de sécurité S3 — GSE"
-                  width={681}
-                  height={936}
+                  width={329}
+                  height={472}
                   priority
-                  className="w-[74vw] max-w-[330px] drop-shadow-2xl lg:max-w-[420px]"
+                  className="w-[62vw] max-w-[300px] drop-shadow-2xl lg:max-w-[380px]"
                 />
               </motion.div>
             </motion.div>
 
-            {/* reflection */}
+            {/* reflection — clipped to a short strip under the sole */}
             <div
               aria-hidden
-              className="pointer-events-none mx-auto -mt-2 w-[74vw] max-w-[330px] scale-y-[-1] opacity-20 lg:max-w-[420px] [mask-image:linear-gradient(to_bottom,black,transparent_55%)]"
+              className="pointer-events-none mx-auto -mt-1 h-16 w-[62vw] max-w-[300px] overflow-hidden opacity-15 lg:max-w-[380px] [mask-image:linear-gradient(to_bottom,black,transparent_80%)]"
             >
               <Image
                 src="/hero-shoe.png"
                 alt=""
-                width={681}
-                height={936}
-                className="w-full"
+                width={329}
+                height={472}
+                className="w-full scale-y-[-1]"
               />
             </div>
 
             {/* ground shadow */}
-            <div className="mx-auto -mt-6 h-5 w-2/3 rounded-[100%] bg-[hsl(214_60%_20%)]/25 blur-2xl" />
+            <div className="mx-auto -mt-10 h-5 w-2/3 rounded-[100%] bg-[hsl(214_60%_20%)]/25 blur-2xl" />
           </motion.div>
         </div>
 

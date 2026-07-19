@@ -68,6 +68,8 @@
       system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* Never let a wide element (slider, decorative text) shrink the page on mobile. */
+    overflow-x: clip;
   }
   /* Headings: Poppins (brand display font). */
   h1, h2, h3, h4, h5, h6 {

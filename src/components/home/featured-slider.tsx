@@ -109,7 +109,7 @@ export function FeaturedSlider({ products }: { products: Product[] }) {
           <p className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--brand-red))]">
             Sélection
           </p>
-          <h2 className="mt-1 text-2xl font-bold tracking-tight text-[hsl(214_60%_14%)] sm:text-3xl">
+          <h2 className="mt-1 text-2xl font-bold tracking-tight text-[hsl(var(--foreground))] sm:text-3xl">
             Produits vedettes
           </h2>
         </div>
@@ -132,7 +132,7 @@ export function FeaturedSlider({ products }: { products: Product[] }) {
           768: { slidesPerView: 3 },
           1024: { slidesPerView: 4 },
         }}
-        className="!overflow-visible"
+        className="!px-1 !py-2"
       >
         {products.map((p) => (
           <SwiperSlide key={p.id} className="h-auto self-stretch">
