@@ -1,6 +1,7 @@
 import { listProducts, listCollectionsWithCounts } from "@/lib/catalog";
 import { resolveTenant } from "@/lib/tenant/registry";
 import { Hero } from "@/components/home/hero";
+import { FeaturedSlider } from "@/components/home/featured-slider";
 import { Features } from "@/components/home/features";
 import { ProductGrid } from "@/components/product/product-grid";
 import { CollectionCard } from "@/components/collection/collection-card";
@@ -35,6 +36,8 @@ export default async function HomePage() {
       />
 
       <Hero tagline={tenant.branding.tagline ?? ""} />
+
+      <FeaturedSlider products={trending.slice(0, 4)} />
 
       <Features />
 
