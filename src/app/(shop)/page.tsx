@@ -1,4 +1,8 @@
-import { listProducts, listCollectionsWithCounts } from "@/lib/catalog";
+import {
+  listProducts,
+  listFeaturedProducts,
+  listCollectionsWithCounts,
+} from "@/lib/catalog";
 import { resolveTenant } from "@/lib/tenant/registry";
 import { Hero } from "@/components/home/hero";
 import { FeaturedSlider } from "@/components/home/featured-slider";
@@ -15,9 +19,10 @@ import { appUrl } from "@/lib/seo";
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [tenant, products, collections] = await Promise.all([
+  const [tenant, products, featured, collections] = await Promise.all([
     resolveTenant(),
     listProducts({ first: 8 }),
+    listFeaturedProducts(4),
     listCollectionsWithCounts(),
   ]);
 
@@ -37,7 +42,7 @@ export default async function HomePage() {
 
       <Hero tagline={tenant.branding.tagline ?? ""} />
 
-      <FeaturedSlider products={trending.slice(0, 4)} />
+      <FeaturedSlider products={featured} />
 
       <Features />
 

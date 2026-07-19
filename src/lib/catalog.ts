@@ -99,6 +99,20 @@ export async function listProducts(opts?: {
   return opts?.first ? list.slice(0, opts.first) : list;
 }
 
+/**
+ * Products flagged "Mis en avant" in the admin — used by the home featured
+ * slider. Falls back to the newest products when none are flagged.
+ */
+export async function listFeaturedProducts(limit = 4): Promise<Product[]> {
+  const native = await listNativeProducts().catch(() => []);
+  if (native.length > 0) {
+    const featured = native.filter((p) => p.featured);
+    const pick = featured.length > 0 ? featured : native;
+    return pick.slice(0, limit).map(nativeToProduct);
+  }
+  return listProducts({ first: limit });
+}
+
 export async function getProduct(handle: string): Promise<Product | null> {
   const native = await getNativeProduct(handle).catch(() => null);
   if (native) return nativeToProduct(native);
