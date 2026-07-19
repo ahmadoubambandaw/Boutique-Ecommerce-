@@ -1,87 +1,85 @@
+import { Palette, Info } from "lucide-react";
 import { resolveTenant } from "@/lib/tenant/registry";
-import { PLANS } from "@/lib/tenant/plans";
-import { formatPrice } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-import { TenantSettingsForm } from "@/components/admin/tenant-settings-form";
+import { getSiteSettings } from "@/lib/commerce/settings";
+import { isDbConfigured } from "@/lib/db/client";
+import { CONTACT } from "@/lib/contact";
+import { BrandSettingsForm } from "@/components/admin/brand-settings-form";
+import { AdminReveal } from "@/components/admin/admin-reveal";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminSettingsPage() {
-  const tenant = await resolveTenant();
-  const plan = PLANS[tenant.plan];
+  const [tenant, settings] = await Promise.all([
+    resolveTenant(),
+    getSiteSettings(),
+  ]);
 
   const rows: [string, string][] = [
     ["Nom de la boutique", tenant.branding.storeName],
-    ["Domaine Shopify", tenant.shopify.storeDomain || "Non configuré"],
-    ["Domaine personnalisé", tenant.customDomain ?? "—"],
-    ["Slug", `${tenant.slug}.boutique.app`],
-    ["Mode couleur", tenant.theme.defaultMode],
-    ["Police", tenant.theme.fontFamily],
-    ["Meta Pixel", tenant.integrations.metaPixelId ?? "Non configuré"],
-    ["Google Analytics", tenant.integrations.googleAnalyticsId ?? "Non configuré"],
+    ["Contact e-mail", CONTACT.email],
+    ["Téléphone", CONTACT.phone],
+    ["Adresse", CONTACT.address],
+    ["Base de données", isDbConfigured() ? "Connectée ✓" : "Non configurée"],
+    ["Mode couleur par défaut", tenant.theme.defaultMode],
   ];
 
   return (
     <div className="max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Paramètres</h1>
-        <p className="text-sm text-[hsl(var(--muted-foreground))]">
-          Configuration de votre boutique et de votre abonnement.
-        </p>
-      </div>
+      <AdminReveal>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Paramètres</h1>
+          <p className="text-sm text-[hsl(var(--muted-foreground))]">
+            Personnalisez l&apos;apparence de votre boutique.
+          </p>
+        </div>
+      </AdminReveal>
 
-      {/* Subscription */}
-      <div className="rounded-2xl border border-[hsl(var(--border))] p-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="font-semibold">Abonnement {plan.name}</h2>
-            <p className="text-sm text-[hsl(var(--muted-foreground))]">
-              {formatPrice(plan.priceMonthly, plan.currency)}/mois · via Stripe
-            </p>
+      {/* Appearance */}
+      <AdminReveal delay={0.05}>
+        <div className="rounded-2xl border border-[hsl(var(--border))] p-5 sm:p-6">
+          <div className="mb-1 flex items-center gap-2">
+            <Palette className="h-5 w-5 text-[hsl(var(--accent))]" />
+            <h2 className="font-semibold">Apparence de la boutique</h2>
           </div>
-          <Badge>{tenant.status}</Badge>
+          <p className="mb-6 text-sm text-[hsl(var(--muted-foreground))]">
+            Couleur d&apos;accent, nom, slogan et bannière — appliqués à tout le
+            storefront.
+          </p>
+          {isDbConfigured() ? (
+            <BrandSettingsForm
+              storeName={settings?.storeName ?? tenant.branding.storeName}
+              tagline={settings?.tagline ?? tenant.branding.tagline ?? ""}
+              accent={settings?.accent ?? tenant.theme.accent}
+              bannerMessage={
+                settings?.bannerMessage ?? tenant.banners[0]?.message ?? ""
+              }
+              bannerActive={settings?.bannerActive ?? true}
+            />
+          ) : (
+            <p className="rounded-xl bg-amber-500/10 px-3 py-2 text-sm">
+              Connectez une base de données pour enregistrer la personnalisation.
+            </p>
+          )}
         </div>
-        <ul className="mt-4 grid gap-2 text-sm text-[hsl(var(--muted-foreground))] sm:grid-cols-2">
-          {plan.highlights.map((h) => (
-            <li key={h}>• {h}</li>
-          ))}
-        </ul>
-        <div className="mt-5 flex gap-3">
-          <a
-            href="/api/stripe/portal"
-            className="inline-flex h-10 items-center rounded-full bg-[hsl(var(--accent))] px-5 text-sm font-medium text-[hsl(var(--accent-foreground))]"
-          >
-            Gérer l'abonnement
-          </a>
-          <a
-            href="/pricing"
-            className="inline-flex h-10 items-center rounded-full border border-[hsl(var(--border))] px-5 text-sm hover:bg-[hsl(var(--muted))]"
-          >
-            Changer de plan
-          </a>
+      </AdminReveal>
+
+      {/* Info recap */}
+      <AdminReveal delay={0.1}>
+        <div className="rounded-2xl border border-[hsl(var(--border))] p-5 sm:p-6">
+          <div className="mb-4 flex items-center gap-2">
+            <Info className="h-5 w-5 text-[hsl(var(--muted-foreground))]" />
+            <h2 className="font-semibold">Informations</h2>
+          </div>
+          <dl className="divide-y divide-[hsl(var(--border))]">
+            {rows.map(([k, v]) => (
+              <div key={k} className="flex items-center justify-between gap-4 py-3 text-sm">
+                <dt className="text-[hsl(var(--muted-foreground))]">{k}</dt>
+                <dd className="text-right font-medium">{v}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
-      </div>
-
-      {/* Storefront customization */}
-      <div className="rounded-2xl border border-[hsl(var(--border))] p-5">
-        <h2 className="mb-1 font-semibold">Personnalisation de la boutique</h2>
-        <p className="mb-6 text-sm text-[hsl(var(--muted-foreground))]">
-          Couleurs, police, logo, bannière et SEO — appliqués instantanément à
-          votre storefront.
-        </p>
-        <TenantSettingsForm tenant={tenant} />
-      </div>
-
-      {/* Configuration summary */}
-      <div className="rounded-2xl border border-[hsl(var(--border))] p-5">
-        <h2 className="mb-4 font-semibold">Récapitulatif technique</h2>
-        <dl className="divide-y divide-[hsl(var(--border))]">
-          {rows.map(([k, v]) => (
-            <div key={k} className="flex items-center justify-between py-3 text-sm">
-              <dt className="text-[hsl(var(--muted-foreground))]">{k}</dt>
-              <dd className="font-medium">{v}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
+      </AdminReveal>
     </div>
   );
 }

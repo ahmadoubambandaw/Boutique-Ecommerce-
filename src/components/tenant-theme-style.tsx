@@ -12,10 +12,8 @@ const RADIUS_MAP: Record<TenantTheme["radius"], string> = {
  * plug in the same way. Server-rendered so there is no flash.
  */
 export function TenantThemeStyle({ theme }: { theme: TenantTheme }) {
-  // Ring + radius apply in both modes; the brand accent is set for light only so
-  // dark mode keeps its own lighter, higher-contrast accent from globals.css.
-  const css =
-    `:root{--ring:${theme.primary};--radius-brand:${RADIUS_MAP[theme.radius]};}` +
-    `:root:not(.dark):not([data-theme="dark"]){--accent:${theme.accent};}`;
+  // The chosen accent applies in both light and dark so the merchant's colour
+  // is honoured everywhere; ring + radius follow.
+  const css = `:root{--accent:${theme.accent};--ring:${theme.primary};--radius-brand:${RADIUS_MAP[theme.radius]};}`;
   return <style dangerouslySetInnerHTML={{ __html: css }} />;
 }

@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import type { Tenant } from "./types";
 import { featuresForPlan } from "./plans";
 import { findTenantByHost } from "./repository";
+import { getSiteSettings } from "@/lib/commerce/settings";
 
 /**
  * Tenant registry.
@@ -86,7 +87,31 @@ export const resolveTenant = cache(async (): Promise<Tenant> => {
     "";
 
   const tenant = await loadTenantFromStore(host);
-  return tenant ?? defaultTenant();
+  if (tenant) return tenant;
+
+  // Single-store mode: overlay the merchant's saved settings on the GSE default.
+  const base = defaultTenant();
+  const s = await getSiteSettings().catch(() => null);
+  if (s) {
+    base.theme = {
+      ...base.theme,
+      accent: s.accent ?? base.theme.accent,
+      primary: s.primary ?? base.theme.primary,
+    };
+    base.branding = {
+      ...base.branding,
+      storeName: s.storeName ?? base.branding.storeName,
+      tagline: s.tagline ?? base.branding.tagline,
+    };
+    if (s.bannerMessage) {
+      base.banners = [
+        { id: "primary", message: s.bannerMessage, href: "/products", active: s.bannerActive },
+      ];
+    } else if (!s.bannerActive) {
+      base.banners = [];
+    }
+  }
+  return base;
 });
 
 /**

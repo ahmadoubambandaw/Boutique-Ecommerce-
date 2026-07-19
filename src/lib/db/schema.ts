@@ -203,3 +203,21 @@ export type ProductRow = typeof products.$inferSelect;
 export type NewProductRow = typeof products.$inferInsert;
 export type CollectionRow = typeof collections.$inferSelect;
 export type OrderRow = typeof orders.$inferSelect;
+
+/**
+ * Single-row store settings the merchant edits from the admin (accent colour,
+ * store name, tagline, announcement banner). Nullable columns fall back to the
+ * hard-coded GSE defaults when empty.
+ */
+export const siteSettings = pgTable("site_settings", {
+  id: text("id").primaryKey().default("default"),
+  accent: text("accent"),
+  primary: text("primary"),
+  storeName: text("store_name"),
+  tagline: text("tagline"),
+  bannerMessage: text("banner_message"),
+  bannerActive: boolean("banner_active").notNull().default(true),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type SiteSettingsRow = typeof siteSettings.$inferSelect;
