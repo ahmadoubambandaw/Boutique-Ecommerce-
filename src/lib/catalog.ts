@@ -117,6 +117,10 @@ export async function getProduct(handle: string): Promise<Product | null> {
   const native = await getNativeProduct(handle).catch(() => null);
   if (native) return nativeToProduct(native);
 
+  // A real catalogue exists but this handle isn't in it → 404, never demo data.
+  const all = await listNativeProducts().catch(() => []);
+  if (all.length > 0) return null;
+
   if (await hasShopify()) {
     try {
       const product = await shopify.getProduct(handle);
@@ -183,6 +187,10 @@ export async function getCollection(handle: string): Promise<Collection | null> 
   const native = await getNativeCollection(handle).catch(() => null);
   if (native) return nativeToCollection(native);
 
+  // A real catalogue exists but this handle isn't in it → 404, never demo data.
+  const cols = await listNativeCollections().catch(() => []);
+  if (cols.length > 0) return null;
+
   if (await hasShopify()) {
     try {
       const collection = await shopify.getCollection(handle);
@@ -203,6 +211,10 @@ export async function getCollectionProducts(
     const items = await getNativeCollectionProducts(handle);
     return bySort(items.map(nativeToProduct), sort);
   }
+
+  // A real catalogue exists but this handle isn't in it → empty, never demo data.
+  const cols = await listNativeCollections().catch(() => []);
+  if (cols.length > 0) return [];
 
   if (await hasShopify()) {
     try {
