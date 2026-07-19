@@ -3,124 +3,113 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 
-const container = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } },
-};
-const item = {
-  hidden: { opacity: 0, y: 24 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const },
-  },
-};
-
-/** Layered 3D extrusion for the giant background word. */
-const EXTRUDE = {
-  textShadow: [
-    "1px 1px 0 #cbd5e6",
-    "2px 2px 0 #c0cbe0",
-    "3px 3px 0 #b5c1d9",
-    "4px 4px 0 #aab8d2",
-    "5px 5px 0 #9fafcb",
-    "6px 6px 0 #94a6c4",
-    "8px 10px 22px rgba(10,46,93,0.25)",
-  ].join(","),
-};
+const ease = [0.22, 1, 0.36, 1] as const;
 
 export function Hero({ tagline }: { tagline: string }) {
   return (
-    <section className="relative flex min-h-[88vh] items-center justify-center overflow-hidden bg-gradient-to-b from-white via-[hsl(214_36%_97%)] to-[hsl(214_30%_92%)]">
-      {/* Giant 3D background word */}
+    <section className="relative flex min-h-[90vh] items-center overflow-hidden bg-gradient-to-b from-white via-[hsl(214_30%_96%)] to-[hsl(214_24%_90%)]">
+      {/* Giant brand word behind the product */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"
       >
         <motion.span
-          initial={{ opacity: 0, scale: 1.08 }}
-          animate={{ opacity: 0.7, scale: 1 }}
-          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-          className="select-none whitespace-nowrap text-[30vw] font-black leading-none tracking-tighter text-[hsl(214_38%_91%)] lg:text-[24vw]"
-          style={EXTRUDE}
+          initial={{ opacity: 0, scale: 1.06 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.1, ease }}
+          className="select-none text-[34vw] font-black leading-none tracking-tighter text-[hsl(214_22%_84%)] lg:text-[22vw]"
+          style={{
+            textShadow:
+              "2px 2px 0 #c3ccdb, 4px 4px 0 #b4bfd2, 6px 6px 0 #a6b3ca, 10px 14px 26px rgba(10,46,93,0.20)",
+          }}
         >
-          SÉCURITÉ
+          GSE
         </motion.span>
       </div>
 
-      {/* Foreground content */}
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="visible"
-        className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center px-4 py-16 text-center sm:px-6"
-      >
-        <motion.span
-          variants={item}
-          className="glass inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium tracking-wide"
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[1fr_1.25fr_1fr] lg:gap-4 lg:px-8">
+        {/* Left — headline + primary CTA */}
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease, delay: 0.1 }}
+          className="text-center lg:text-left"
         >
-          <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--brand-red))]" />
-          EPI &amp; sécurité incendie · Livraison à Dakar
-        </motion.span>
+          <span className="glass inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium tracking-wide">
+            <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--brand-red))]" />
+            EPI &amp; sécurité incendie
+          </span>
+          <h1 className="mt-5 text-balance text-4xl font-bold leading-[1.05] tracking-tight text-[hsl(214_60%_14%)] sm:text-5xl lg:text-6xl">
+            La sécurité,
+            <br />
+            <span className="text-[hsl(var(--brand-red))]">sans compromis.</span>
+          </h1>
+          <p className="mx-auto mt-4 max-w-xs text-sm text-[hsl(214_20%_38%)] lg:mx-0">
+            {tagline}
+          </p>
+          <Link
+            href="/products"
+            className="group mt-6 inline-flex items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-7 py-3.5 text-sm font-medium text-[hsl(var(--accent-foreground))] shadow-lg shadow-[hsl(214_50%_20%)]/25 transition-all hover:gap-3"
+          >
+            Découvrir le catalogue
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
+        </motion.div>
 
-        <motion.h1
-          variants={item}
-          className="mt-6 text-balance text-4xl font-bold leading-[1.05] tracking-tight text-[hsl(214_60%_14%)] sm:text-6xl lg:text-7xl"
+        {/* Center — floating product */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease, delay: 0.15 }}
+          className="flex flex-col items-center"
         >
-          Votre sécurité,
-          <br />
-          <span className="text-[hsl(var(--brand-red))]">notre engagement.</span>
-        </motion.h1>
-
-        {/* Floating GSE medallion */}
-        <motion.div variants={item} className="my-9">
           <motion.div
             animate={{ y: [0, -14, 0] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="relative"
           >
-            <div className="rounded-[2rem] bg-white p-4 shadow-2xl ring-1 ring-black/5 sm:p-6">
-              <Image
-                src="/gse-logo.jpg"
-                alt="GSE — Global Safety Équipement"
-                width={224}
-                height={224}
-                priority
-                className="h-32 w-32 object-contain sm:h-40 sm:w-40 lg:h-48 lg:w-48"
-              />
-            </div>
-            <div className="mx-auto mt-4 h-3 w-2/3 rounded-[100%] bg-[hsl(214_50%_20%)]/20 blur-xl" />
+            <Image
+              src="/hero-shoe.jpg"
+              alt="Chaussures de sécurité S3"
+              width={735}
+              height={956}
+              priority
+              className="w-[68vw] max-w-[340px] mix-blend-multiply lg:max-w-[440px]"
+            />
           </motion.div>
+          <div className="-mt-2 h-4 w-2/3 rounded-[100%] bg-[hsl(214_50%_20%)]/25 blur-xl" />
         </motion.div>
 
-        <motion.p
-          variants={item}
-          className="max-w-xl text-balance text-base text-[hsl(214_20%_35%)] sm:text-lg"
-        >
-          {tagline} Équipements de protection individuelle et solutions de
-          sécurité incendie certifiés, pour les professionnels.
-        </motion.p>
-
+        {/* Right — featured product */}
         <motion.div
-          variants={item}
-          className="mt-8 flex flex-wrap justify-center gap-4"
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease, delay: 0.2 }}
+          className="text-center lg:text-right"
         >
+          <p className="text-xs font-semibold uppercase tracking-widest text-[hsl(var(--brand-red))]">
+            À la une
+          </p>
+          <p className="mt-2 text-xl font-semibold text-[hsl(214_60%_14%)]">
+            Chaussures de sécurité S3
+          </p>
+          <p className="mt-1 text-sm text-[hsl(214_20%_38%)]">
+            Norme EN ISO 20345 · embout &amp; semelle anti-perforation
+          </p>
+          <p className="mt-3 text-lg font-bold text-[hsl(214_60%_14%)]">
+            à partir de 30 000 F CFA
+          </p>
           <Link
-            href="/products"
-            className="group inline-flex h-14 items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-8 text-base font-medium text-[hsl(var(--accent-foreground))] shadow-lg shadow-[hsl(214_50%_20%)]/25 transition-all hover:gap-3"
+            href="/products/chaussures-securite-s3"
+            className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[hsl(var(--accent))] hover:underline"
           >
-            Découvrir le catalogue
-            <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-          </Link>
-          <Link
-            href="/collections"
-            className="inline-flex h-14 items-center rounded-full border border-[hsl(214_30%_80%)] bg-white/60 px-8 text-base font-medium text-[hsl(214_60%_14%)] backdrop-blur transition-colors hover:bg-white"
-          >
-            Voir les catégories
+            Voir le produit
+            <ArrowUpRight className="h-4 w-4" />
           </Link>
         </motion.div>
-      </motion.div>
+      </div>
     </section>
   );
 }
