@@ -1,5 +1,6 @@
 import {
   boolean,
+  date,
   index,
   integer,
   jsonb,
@@ -221,3 +222,9 @@ export const siteSettings = pgTable("site_settings", {
 });
 
 export type SiteSettingsRow = typeof siteSettings.$inferSelect;
+
+/** Daily storefront visit counter (unique-ish sessions) for the dashboard. */
+export const visits = pgTable("visits", {
+  day: date("day").primaryKey(),
+  count: integer("count").notNull().default(0),
+});

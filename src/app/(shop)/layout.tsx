@@ -5,6 +5,7 @@ import { CompareBar } from "@/components/product/compare-bar";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { Toaster } from "@/components/ui/toaster";
 import { WhatsAppFab } from "@/components/whatsapp-fab";
+import { VisitTracker } from "@/components/visit-tracker";
 import { resolveTenant } from "@/lib/tenant/registry";
 
 /** Storefront shell — the customer-facing chrome (header, footer, cart, …). */
@@ -28,6 +29,7 @@ export default async function StorefrontLayout({
       <CompareBar />
       <Toaster />
       <WhatsAppFab />
+      <VisitTracker />
     </>
   );
 }

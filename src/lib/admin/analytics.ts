@@ -4,6 +4,7 @@ import { adminFetch, hasAdminApi } from "@/lib/shopify/admin";
 import { MOCK_PRODUCTS } from "@/lib/mock/data";
 import { MOCK_ORDERS } from "@/lib/mock/orders";
 import { listOrders } from "@/lib/commerce/repository";
+import { countVisits } from "@/lib/commerce/visits";
 
 /**
  * Read-only store analytics for the merchant dashboard.
@@ -171,8 +172,11 @@ async function getShopifyMetrics(): Promise<DashboardMetrics | null> {
 
 /** Real metrics computed from our own (native) orders in Postgres. */
 async function getNativeMetrics(): Promise<DashboardMetrics | null> {
-  const orders = await listOrders().catch(() => []);
-  if (orders.length === 0) return null;
+  const [orders, visitors] = await Promise.all([
+    listOrders().catch(() => []),
+    countVisits(DAYS).catch(() => 0),
+  ]);
+  if (orders.length === 0 && visitors === 0) return null;
 
   const currency = orders[0]?.currency ?? "XOF";
   const paid = orders.filter((o) => o.status !== "cancelled");
@@ -227,9 +231,12 @@ async function getNativeMetrics(): Promise<DashboardMetrics | null> {
     revenueChange: null,
     orders: orders.length,
     ordersChange: null,
-    visitors: null,
+    visitors: visitors > 0 ? visitors : null,
     visitorsChange: null,
-    conversionRate: null,
+    conversionRate:
+      visitors > 0
+        ? Math.round((orders.length / visitors) * 1000) / 10
+        : null,
     currency,
     source: "native",
     revenueSeries: series,
