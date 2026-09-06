@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { pingRestApi, pingPostgres } from "@/lib/db/wake";
+import { pingRestApi, pingAuthHealth, pingPostgres } from "@/lib/db/wake";
 
 /**
  * Keeps the Supabase project out of hibernation.
@@ -29,11 +29,15 @@ export async function GET(request: Request) {
     }
   }
 
-  const rest = await pingRestApi();
+  // Two pings on purpose: /auth/v1/health answers 200 without a key, while
+  // /rest/v1/ returns 401 unless SUPABASE_ANON_KEY is set — and a rejected
+  // request is not a reliable activity signal.
+  const [auth, rest] = await Promise.all([pingAuthHealth(), pingRestApi()]);
   const db = await pingPostgres();
 
   return NextResponse.json({
-    ok: rest.ok && db,
+    ok: auth.ok && db,
+    authStatus: auth.status,
     restStatus: rest.status,
     database: db ? "awake" : "unreachable",
     at: new Date().toISOString(),

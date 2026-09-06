@@ -65,8 +65,9 @@ export async function pingRestApi(): Promise<{
   const base = baseUrl();
   if (!base) return { ok: false, status: 0, body: "no Supabase project ref" };
 
-  // The key is optional: an unauthenticated call still reaches the platform,
-  // and a 401 counts as activity just as well as a 200.
+  // The key is optional — without it the gateway answers 401, which is still
+  // enough to tell a served project from a paused one. For keeping a project
+  // awake, prefer pingAuthHealth(): a rejected request is a weaker signal.
   const key = anonKey();
   const headers: Record<string, string> = key
     ? { apikey: key, Authorization: `Bearer ${key}` }
@@ -82,6 +83,25 @@ export async function pingRestApi(): Promise<{
     return { ok: true, status: res.status, body: body.slice(0, 300) };
   } catch (e) {
     return { ok: false, status: 0, body: String(e).slice(0, 300) };
+  }
+}
+
+/**
+ * Ping the Auth health endpoint. Unlike PostgREST it needs no API key, so it
+ * answers 200 rather than 401 — which matters when the point of the request is
+ * to register as project activity: a rejected call may not count.
+ */
+export async function pingAuthHealth(): Promise<{ ok: boolean; status: number }> {
+  const base = baseUrl();
+  if (!base) return { ok: false, status: 0 };
+  try {
+    const res = await fetch(`${base}/auth/v1/health`, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(15_000),
+    });
+    return { ok: res.ok, status: res.status };
+  } catch {
+    return { ok: false, status: 0 };
   }
 }
 
