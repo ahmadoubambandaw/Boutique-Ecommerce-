@@ -1,6 +1,6 @@
 import "server-only";
 import { sql } from "drizzle-orm";
-import { getDb } from "./client";
+import { getDb, noteDbFailure, noteDbSuccess } from "./client";
 import { captureMessage } from "@/lib/monitoring";
 
 /**
@@ -69,14 +69,7 @@ export async function pingRestApi(): Promise<{
 
 /** True when Postgres accepts a trivial query. */
 export async function pingPostgres(): Promise<boolean> {
-  const db = getDb();
-  if (!db) return false;
-  try {
-    await db.execute(sql`select 1`);
-    return true;
-  } catch {
-    return false;
-  }
+  return (await tryQuery()) === "";
 }
 
 export type WakeResult = {
@@ -88,14 +81,20 @@ export type WakeResult = {
   elapsedMs: number;
 };
 
-/** Run a trivial query, returning the failure message when it does not work. */
+/**
+ * Run a trivial query, returning the failure message when it does not work.
+ * A health probe is an explicit request to test the database, so it clears the
+ * local cool-down first rather than being short-circuited by it.
+ */
 async function tryQuery(): Promise<string> {
+  noteDbSuccess();
   const db = getDb();
   if (!db) return "no DATABASE_URL";
   try {
     await db.execute(sql`select 1`);
     return "";
   } catch (e) {
+    noteDbFailure();
     const err = e instanceof Error ? e : new Error(String(e));
     const cause = (err as { cause?: unknown }).cause;
     return `${err.message}${cause ? ` | cause: ${String(cause)}` : ""}`.slice(0, 300);

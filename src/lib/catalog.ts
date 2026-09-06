@@ -15,7 +15,7 @@ import {
   listNativeProducts,
 } from "@/lib/commerce/repository";
 import { nativeToCollection, nativeToProduct } from "@/lib/commerce/map";
-import { isDbConfigured } from "@/lib/db/client";
+import { isDbConfigured, noteDbFailure, noteDbSuccess } from "@/lib/db/client";
 import { captureError } from "@/lib/monitoring";
 import type { Collection, Product } from "@/lib/shopify/types";
 
@@ -74,10 +74,17 @@ export async function listProducts(opts?: {
   first?: number;
 }): Promise<Product[]> {
   // 1. Native DB
-  const native = await listNativeProducts().catch((e) => {
-    captureError(e, { stage: "listProducts" });
-    return [];
-  });
+  const native = await listNativeProducts().then(
+    (rows) => {
+      noteDbSuccess();
+      return rows;
+    },
+    (e) => {
+      noteDbFailure();
+      captureError(e, { stage: "listProducts" });
+      return [];
+    },
+  );
   if (native.length === 0 && ownCatalogue()) return [];
   if (native.length > 0) {
     let list = native.map(nativeToProduct);
@@ -174,10 +181,17 @@ export async function getRecommendations(
 }
 
 export async function listCollections(): Promise<Collection[]> {
-  const native = await listNativeCollections().catch((e) => {
-    captureError(e, { stage: "listCollections" });
-    return [];
-  });
+  const native = await listNativeCollections().then(
+    (rows) => {
+      noteDbSuccess();
+      return rows;
+    },
+    (e) => {
+      noteDbFailure();
+      captureError(e, { stage: "listCollections" });
+      return [];
+    },
+  );
   if (native.length > 0) return native.map(nativeToCollection);
   if (ownCatalogue()) return [];
 
