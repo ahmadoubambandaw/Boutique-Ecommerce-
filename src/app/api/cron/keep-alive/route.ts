@@ -29,9 +29,10 @@ export async function GET(request: Request) {
     }
   }
 
-  // Two pings on purpose: /auth/v1/health answers 200 without a key, while
-  // /rest/v1/ returns 401 unless SUPABASE_ANON_KEY is set — and a rejected
-  // request is not a reliable activity signal.
+  // Two pings on purpose. /auth/v1/health accepts the anon key and answers 200
+  // — that accepted request is the activity signal. /rest/v1/ answers 401 even
+  // with the key, because anon holds no privileges on any table here; it is
+  // kept as a secondary probe, which is why `ok` tracks the auth ping alone.
   const [auth, rest] = await Promise.all([pingAuthHealth(), pingRestApi()]);
   const db = await pingPostgres();
 
