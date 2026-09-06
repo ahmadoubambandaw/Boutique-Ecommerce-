@@ -44,12 +44,26 @@ function baseUrl(): string | null {
   return ref ? `https://${ref}.supabase.co` : null;
 }
 
+/**
+ * Anon ("publishable") key. Public by design — it grants nothing on its own,
+ * since every table has RLS enabled with no policy for this role.
+ *
+ * The built-in value is pinned to the project it belongs to and is only used
+ * when DATABASE_URL points at that same project. That guard matters: an earlier
+ * version hard-coded a key without it and kept pinging a decommissioned project
+ * long after the app had moved. Set SUPABASE_ANON_KEY to override.
+ */
+const KNOWN_ANON_KEYS: Record<string, string> = {
+  cdktjngwukkeededkvji:
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNka3Rqbmd3dWtrZWVkZWRrdmppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2NzMxOTQsImV4cCI6MjEwNDI0OTE5NH0.e0cb14jmeUV1TBz66e89ffW6-CmCu7baCYhQFjnMKF0",
+};
+
 function anonKey(): string | null {
-  return (
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    null
-  );
+  const fromEnv =
+    process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (fromEnv) return fromEnv;
+  const ref = projectRef();
+  return ref ? (KNOWN_ANON_KEYS[ref] ?? null) : null;
 }
 
 /**
@@ -87,15 +101,18 @@ export async function pingRestApi(): Promise<{
 }
 
 /**
- * Ping the Auth health endpoint. Unlike PostgREST it needs no API key, so it
- * answers 200 rather than 401 — which matters when the point of the request is
- * to register as project activity: a rejected call may not count.
+ * Ping the Auth health endpoint — a cheap request that returns 200 when the key
+ * is supplied. An accepted request is what should register as project activity;
+ * a 401 is rejected at the gateway and is a far weaker signal, which is the
+ * whole point of keeping this ping authenticated.
  */
 export async function pingAuthHealth(): Promise<{ ok: boolean; status: number }> {
   const base = baseUrl();
   if (!base) return { ok: false, status: 0 };
+  const key = anonKey();
   try {
     const res = await fetch(`${base}/auth/v1/health`, {
+      headers: key ? { apikey: key } : {},
       cache: "no-store",
       signal: AbortSignal.timeout(15_000),
     });
