@@ -15,7 +15,18 @@ import {
   listNativeProducts,
 } from "@/lib/commerce/repository";
 import { nativeToCollection, nativeToProduct } from "@/lib/commerce/map";
+import { isDbConfigured } from "@/lib/db/client";
+import { captureError } from "@/lib/monitoring";
 import type { Collection, Product } from "@/lib/shopify/types";
+
+/**
+ * True when this store runs on its own database. In that case the demo
+ * catalogue must NEVER be served — a transient DB outage should show an empty
+ * shop, not someone else's fashion products.
+ */
+function ownCatalogue(): boolean {
+  return isDbConfigured();
+}
 
 /**
  * App-facing catalogue facade. Source priority:
@@ -63,7 +74,11 @@ export async function listProducts(opts?: {
   first?: number;
 }): Promise<Product[]> {
   // 1. Native DB
-  const native = await listNativeProducts().catch(() => []);
+  const native = await listNativeProducts().catch((e) => {
+    captureError(e, { stage: "listProducts" });
+    return [];
+  });
+  if (native.length === 0 && ownCatalogue()) return [];
   if (native.length > 0) {
     let list = native.map(nativeToProduct);
     if (opts?.query) {
@@ -105,6 +120,7 @@ export async function listProducts(opts?: {
  */
 export async function listFeaturedProducts(limit = 4): Promise<Product[]> {
   const native = await listNativeProducts().catch(() => []);
+  if (native.length === 0 && ownCatalogue()) return [];
   if (native.length > 0) {
     const featured = native.filter((p) => p.featured);
     const pick = featured.length > 0 ? featured : native;
@@ -114,12 +130,14 @@ export async function listFeaturedProducts(limit = 4): Promise<Product[]> {
 }
 
 export async function getProduct(handle: string): Promise<Product | null> {
-  const native = await getNativeProduct(handle).catch(() => null);
+  const native = await getNativeProduct(handle).catch((e) => {
+    captureError(e, { stage: "getProduct", handle });
+    return null;
+  });
   if (native) return nativeToProduct(native);
 
-  // A real catalogue exists but this handle isn't in it → 404, never demo data.
-  const all = await listNativeProducts().catch(() => []);
-  if (all.length > 0) return null;
+  // Own catalogue → unknown handle (or a DB hiccup) is a 404, never demo data.
+  if (ownCatalogue()) return null;
 
   if (await hasShopify()) {
     try {
@@ -137,6 +155,7 @@ export async function getRecommendations(
   handle: string,
 ): Promise<Product[]> {
   const native = await listNativeProducts().catch(() => []);
+  if (native.length === 0 && ownCatalogue()) return [];
   if (native.length > 0) {
     return native
       .filter((p) => p.handle !== handle)
@@ -155,8 +174,12 @@ export async function getRecommendations(
 }
 
 export async function listCollections(): Promise<Collection[]> {
-  const native = await listNativeCollections().catch(() => []);
+  const native = await listNativeCollections().catch((e) => {
+    captureError(e, { stage: "listCollections" });
+    return [];
+  });
   if (native.length > 0) return native.map(nativeToCollection);
+  if (ownCatalogue()) return [];
 
   if (await hasShopify()) {
     try {
@@ -179,6 +202,7 @@ export async function listCollectionsWithCounts(): Promise<
       count,
     }));
   }
+  if (ownCatalogue()) return [];
   const collections = await listCollections();
   return collections.map((collection) => ({ collection, count: 0 }));
 }
@@ -187,9 +211,8 @@ export async function getCollection(handle: string): Promise<Collection | null> 
   const native = await getNativeCollection(handle).catch(() => null);
   if (native) return nativeToCollection(native);
 
-  // A real catalogue exists but this handle isn't in it → 404, never demo data.
-  const cols = await listNativeCollections().catch(() => []);
-  if (cols.length > 0) return null;
+  // Own catalogue → unknown handle (or a DB hiccup) is a 404, never demo data.
+  if (ownCatalogue()) return null;
 
   if (await hasShopify()) {
     try {
@@ -212,9 +235,8 @@ export async function getCollectionProducts(
     return bySort(items.map(nativeToProduct), sort);
   }
 
-  // A real catalogue exists but this handle isn't in it → empty, never demo data.
-  const cols = await listNativeCollections().catch(() => []);
-  if (cols.length > 0) return [];
+  // Own catalogue → unknown handle (or a DB hiccup) is empty, never demo data.
+  if (ownCatalogue()) return [];
 
   if (await hasShopify()) {
     try {

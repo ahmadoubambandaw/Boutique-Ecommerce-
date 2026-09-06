@@ -47,7 +47,17 @@ export async function adminLoginAction(
     };
   }
 
-  const admin = await verifyAdminCredentials(email, password);
+  let admin: Awaited<ReturnType<typeof verifyAdminCredentials>>;
+  try {
+    admin = await verifyAdminCredentials(email, password);
+  } catch {
+    // DB unreachable (pooler saturated, project restarting…) — say so instead
+    // of crashing with a 500 or blaming the credentials.
+    return {
+      error:
+        "Base de données momentanément indisponible. Réessayez dans quelques instants.",
+    };
+  }
   if (!admin) {
     return { error: "Identifiants invalides." };
   }

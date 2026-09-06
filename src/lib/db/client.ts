@@ -26,7 +26,15 @@ export function getDb(): DB | null {
   }
 
   // `prepare: false` keeps compatibility with serverless poolers (pgbouncer).
-  _sql = postgres(url, { prepare: false, max: 5 });
+  // Serverless: every lambda instance owns its own pool, so cap it at ONE
+  // connection and release it quickly — otherwise concurrent instances exhaust
+  // the database's connection limit and every query starts failing.
+  _sql = postgres(url, {
+    prepare: false,
+    max: 1,
+    idle_timeout: 20,
+    connect_timeout: 10,
+  });
   _db = drizzle(_sql, { schema });
   return _db;
 }
