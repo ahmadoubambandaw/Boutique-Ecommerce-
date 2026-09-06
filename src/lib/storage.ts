@@ -1,5 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
+import { projectRef } from "@/lib/db/wake";
 
 /**
  * Image upload to Supabase Storage (public bucket `product-images`).
@@ -15,15 +16,16 @@ import { randomUUID } from "node:crypto";
 
 const BUCKET = "product-images";
 
-/** Known project URL fallback so only the secret key must be configured. */
-const DEFAULT_SUPABASE_URL = "https://ggqxiaffhawkjzzhvpze.supabase.co";
-
-function supabaseUrl(): string {
-  return (
-    process.env.SUPABASE_URL ||
-    process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    DEFAULT_SUPABASE_URL
-  ).replace(/\/$/, "");
+/**
+ * Project URL. Derived from DATABASE_URL when not set explicitly, so pointing
+ * the app at a different Supabase project never leaves storage aimed at the
+ * old one.
+ */
+function supabaseUrl(): string | null {
+  const explicit = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (explicit) return explicit.replace(/\/$/, "");
+  const ref = projectRef();
+  return ref ? `https://${ref}.supabase.co` : null;
 }
 
 function serviceKey(): string | null {
@@ -31,7 +33,7 @@ function serviceKey(): string | null {
 }
 
 export function isUploadConfigured(): boolean {
-  return Boolean(serviceKey());
+  return Boolean(serviceKey() && supabaseUrl());
 }
 
 function extFor(type: string, name: string): string {
@@ -61,6 +63,9 @@ export async function uploadImage(file: File): Promise<string> {
   }
 
   const base = supabaseUrl();
+  if (!base) {
+    throw new Error("upload-not-configured");
+  }
   const ext = extFor(file.type, file.name);
   const path = `${randomUUID()}.${ext}`;
   const bytes = new Uint8Array(await file.arrayBuffer());
