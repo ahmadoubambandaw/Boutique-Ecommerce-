@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { isDbConfigured } from "@/lib/db/client";
-import { wakeDatabase, pingPostgres } from "@/lib/db/wake";
+import {
+  wakeDatabase,
+  pingPostgres,
+  probeConnections,
+  projectRef,
+} from "@/lib/db/wake";
 
 /**
  * Database health probe — and hibernation wake-up.
@@ -26,7 +31,25 @@ export async function GET(request: Request) {
     );
   }
 
-  const wake = new URL(request.url).searchParams.get("wake");
+  const params = new URL(request.url).searchParams;
+  const wake = params.get("wake");
+
+  // Which pooler endpoint actually answers? Only ever reports redacted URLs.
+  if (params.get("probe")) {
+    const endpoints = await probeConnections();
+    const working = endpoints.find((e) => e.ok);
+    return NextResponse.json(
+      {
+        ok: Boolean(working),
+        projectRef: projectRef(),
+        endpoints,
+        message: working
+          ? `Endpoint fonctionnel : ${working.endpoint}`
+          : "Aucun endpoint ne répond. Vérifiez DATABASE_URL.",
+      },
+      { status: working ? 200 : 503 },
+    );
+  }
 
   if (wake) {
     const result = await wakeDatabase();

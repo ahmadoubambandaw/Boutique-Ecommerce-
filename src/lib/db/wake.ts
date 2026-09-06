@@ -16,29 +16,39 @@ import { captureMessage } from "@/lib/monitoring";
  * request that does count, then polls until Postgres answers.
  */
 
-const DEFAULT_SUPABASE_URL = "https://ggqxiaffhawkjzzhvpze.supabase.co";
-
 /**
- * Legacy anon key (JWT) — public by design, safe to ship client-side. Preferred
- * over the newer `sb_publishable_…` format here because every Supabase gateway
- * version accepts it.
+ * The Supabase project reference, read from DATABASE_URL so this module can
+ * never point at a stale project. Both connection shapes carry it:
+ *   direct  postgresql://postgres:…@db.<ref>.supabase.co:5432/postgres
+ *   pooler  postgresql://<role>.<ref>:…@aws-0-<region>.pooler.supabase.com:6543/…
  */
-const DEFAULT_PUBLISHABLE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdncXhpYWZmaGF3a2p6emh2cHplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMTI2MjQsImV4cCI6MjA5OTc4ODYyNH0.RJHNfoP4xvrrQd2KLGOQBuhM4rcxVC5c5X97QK5ZQ-c";
-
-function baseUrl(): string {
-  return (
-    process.env.SUPABASE_URL ||
-    process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    DEFAULT_SUPABASE_URL
-  ).replace(/\/$/, "");
+export function projectRef(): string | null {
+  const url = process.env.DATABASE_URL;
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    const fromHost = /^db\.([a-z0-9]+)\.supabase\.co$/i.exec(u.hostname);
+    if (fromHost?.[1]) return fromHost[1];
+    const fromUser = /\.([a-z0-9]{20,})$/i.exec(decodeURIComponent(u.username));
+    if (fromUser?.[1]) return fromUser[1];
+  } catch {
+    /* malformed URL — fall through */
+  }
+  return null;
 }
 
-function anonKey(): string {
+function baseUrl(): string | null {
+  const explicit = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (explicit) return explicit.replace(/\/$/, "");
+  const ref = projectRef();
+  return ref ? `https://${ref}.supabase.co` : null;
+}
+
+function anonKey(): string | null {
   return (
     process.env.SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    DEFAULT_PUBLISHABLE_KEY
+    null
   );
 }
 
@@ -52,10 +62,18 @@ export async function pingRestApi(): Promise<{
   status: number;
   body: string;
 }> {
+  const base = baseUrl();
+  if (!base) return { ok: false, status: 0, body: "no Supabase project ref" };
+
+  // The key is optional: an unauthenticated call still reaches the platform,
+  // and a 401 counts as activity just as well as a 200.
   const key = anonKey();
+  const headers: Record<string, string> = key
+    ? { apikey: key, Authorization: `Bearer ${key}` }
+    : {};
   try {
-    const res = await fetch(`${baseUrl()}/rest/v1/`, {
-      headers: { apikey: key, Authorization: `Bearer ${key}` },
+    const res = await fetch(`${base}/rest/v1/`, {
+      headers,
       cache: "no-store",
       signal: AbortSignal.timeout(15_000),
     });
@@ -142,4 +160,71 @@ export async function wakeDatabase(budgetMs = 45_000): Promise<WakeResult> {
     attempts,
     elapsedMs: Date.now() - started,
   };
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Connection endpoint probe
+   ───────────────────────────────────────────────────────────── */
+
+export type ProbeResult = {
+  /** Endpoint tried, with the password redacted — safe to return over HTTP. */
+  endpoint: string;
+  ok: boolean;
+  error?: string;
+};
+
+function redact(url: string): string {
+  try {
+    const u = new URL(url);
+    if (u.password) u.password = "***";
+    return u.toString();
+  } catch {
+    return "invalid URL";
+  }
+}
+
+/**
+ * Supabase serves the connection pooler from regional load balancers whose
+ * hostname carries an index (`aws-0-…`, `aws-1-…`) that differs per project
+ * and is only visible in the dashboard. When the dashboard is unreachable the
+ * index has to be discovered empirically, so build the plausible variants of
+ * the configured URL and let the caller find out which one answers.
+ */
+export function connectionCandidates(url: string): string[] {
+  const seen = new Set<string>([url]);
+  const swap = (from: string, to: string) => {
+    if (url.includes(from)) seen.add(url.replace(from, to));
+  };
+  swap("aws-0-", "aws-1-");
+  swap("aws-1-", "aws-0-");
+  return [...seen];
+}
+
+/** Try each candidate endpoint once and report which ones accept a query. */
+export async function probeConnections(): Promise<ProbeResult[]> {
+  const url = process.env.DATABASE_URL;
+  if (!url) return [{ endpoint: "none", ok: false, error: "DATABASE_URL not set" }];
+
+  // Imported lazily: this diagnostic path must not pull the driver into the
+  // module graph of every request that merely imports the wake helpers.
+  const { default: postgres } = await import("postgres");
+
+  const results: ProbeResult[] = [];
+  for (const candidate of connectionCandidates(url)) {
+    const client = postgres(candidate, {
+      prepare: false,
+      max: 1,
+      connect_timeout: 10,
+      idle_timeout: 5,
+    });
+    try {
+      await client`select 1`;
+      results.push({ endpoint: redact(candidate), ok: true });
+    } catch (e) {
+      const err = e instanceof Error ? e : new Error(String(e));
+      results.push({ endpoint: redact(candidate), ok: false, error: err.message.slice(0, 200) });
+    }
+    await client.end({ timeout: 5 }).catch(() => {});
+  }
+  return results;
 }
