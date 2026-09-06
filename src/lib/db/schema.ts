@@ -228,3 +228,22 @@ export const visits = pgTable("visits", {
   day: date("day").primaryKey(),
   count: integer("count").notNull().default(0),
 });
+
+/**
+ * Newsletter sign-ups. The footer form used to post to Shopify; with no
+ * Shopify store it silently discarded every address while telling the visitor
+ * they were subscribed. Addresses now land here and are listed in the admin.
+ */
+export const newsletterSubscribers = pgTable(
+  "newsletter_subscribers",
+  {
+    email: text("email").primaryKey(),
+    source: text("source").notNull().default("footer"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    createdIdx: index("newsletter_created_idx").on(t.createdAt),
+  }),
+);
+
+export type NewsletterSubscriberRow = typeof newsletterSubscribers.$inferSelect;

@@ -1,29 +1,19 @@
 "use server";
 
-import { adminFetch, hasAdminApi } from "@/lib/shopify/admin";
 import { newsletterSchema } from "@/lib/validations";
-import { captureError, captureMessage } from "@/lib/monitoring";
+import { addSubscriber } from "@/lib/commerce/newsletter";
+import { captureError } from "@/lib/monitoring";
 
 export type NewsletterState = { ok?: boolean; error?: string };
 
-const subscribeMutation = /* GraphQL */ `
-  mutation subscribe($input: CustomerInput!) {
-    customerCreate(input: $input) {
-      customer {
-        id
-      }
-      userErrors {
-        field
-        message
-      }
-    }
-  }
-`;
-
 /**
- * Subscribe an email to marketing. When the tenant has Admin API access we
- * create/opt-in a Shopify customer with email marketing consent; otherwise we
- * record the intent (wire your ESP — Klaviyo/Mailchimp — here).
+ * Store a newsletter sign-up.
+ *
+ * This used to create a Shopify customer, and returned success without saving
+ * anything whenever Shopify was not configured — which, since the store moved
+ * off Shopify, meant every address was silently thrown away behind a "Merci !
+ * Vous êtes inscrit·e" message. Sign-ups now go to our own table and the
+ * confirmation is only shown when the write actually happened.
  */
 export async function subscribeNewsletterAction(
   _prev: NewsletterState,
@@ -33,36 +23,11 @@ export async function subscribeNewsletterAction(
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Adresse e-mail invalide." };
   }
-  const email = parsed.data.email;
-
-  if (!(await hasAdminApi())) {
-    captureMessage("newsletter subscribe (demo)", { email });
-    return { ok: true };
-  }
 
   try {
-    const data = await adminFetch<{
-      customerCreate: {
-        customer: { id: string } | null;
-        userErrors: { field: string[] | null; message: string }[];
-      };
-    }>({
-      query: subscribeMutation,
-      variables: {
-        input: {
-          email,
-          emailMarketingConsent: {
-            marketingState: "SUBSCRIBED",
-            marketingOptInLevel: "SINGLE_OPT_IN",
-          },
-        },
-      },
-    });
-
-    const errors = data.customerCreate.userErrors;
-    // "already been taken" means the email is already a customer — still a success.
-    if (errors.length > 0 && !errors[0]!.message.toLowerCase().includes("taken")) {
-      return { error: errors[0]!.message };
+    const stored = await addSubscriber(parsed.data.email);
+    if (!stored) {
+      return { error: "Inscription momentanément indisponible. Réessayez." };
     }
     return { ok: true };
   } catch (err) {
