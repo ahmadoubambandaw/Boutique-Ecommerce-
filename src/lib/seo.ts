@@ -20,7 +20,17 @@ export async function buildBaseMetadata(): Promise<Metadata> {
     },
     description,
     applicationName: tenant.branding.storeName,
-    keywords: ["e-commerce", "shopify", "boutique", "headless", "mode"],
+    keywords: [
+      "EPI",
+      "équipement de protection individuelle",
+      "sécurité incendie",
+      "extincteur",
+      "détecteur de fumée",
+      "casque de chantier",
+      "chaussures de sécurité",
+      "Dakar",
+      "Sénégal",
+    ],
     openGraph: {
       type: "website",
       title,

@@ -10,7 +10,6 @@ import { useCart } from "@/lib/store/cart";
 import { useWishlist } from "@/lib/store/wishlist";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SearchCommand } from "@/components/search/search-command";
-import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { useT } from "@/lib/store/locale";
 import type { TranslationKey } from "@/lib/i18n/dictionary";
 
@@ -100,7 +99,6 @@ export function Header({
               <Search className="h-5 w-5" />
             </button>
             <ThemeToggle />
-            <LocaleSwitcher />
             <Link
               href="/wishlist"
               aria-label="Favoris"

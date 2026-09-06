@@ -13,7 +13,7 @@ export async function GET() {
     .stripeCustomerId;
 
   if (!stripeCustomerId) {
-    return NextResponse.redirect(new URL("/pricing", base));
+    return NextResponse.redirect(new URL("/", base));
   }
 
   const result = await createBillingPortal(stripeCustomerId);

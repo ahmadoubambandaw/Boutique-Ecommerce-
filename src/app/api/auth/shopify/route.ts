@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
   if (!shop || !isValidShopDomain(shop)) {
     // No/invalid shop → send the merchant to an onboarding prompt.
-    return NextResponse.redirect(new URL("/pricing", appUrl()));
+    return NextResponse.redirect(new URL("/", appUrl()));
   }
 
   if (!process.env.SHOPIFY_API_KEY) {

@@ -1,40 +1,21 @@
-"use client";
-
-import * as React from "react";
-import { CURRENCIES, convert, useCurrency, type CurrencyCode } from "@/lib/store/currency";
 import { formatPrice } from "@/lib/utils";
 
 /**
- * Renders a price converted into the shopper's selected currency.
+ * Renders a price in the currency it is stored in.
  *
- * Demo mode uses static rates; with Shopify connected the base prices already
- * arrive localized via @inContext, so conversion becomes a no-op when
- * base === selected. Hydration-safe: renders the base currency on the server
- * and switches after mount.
+ * This store sells in XOF only. A currency picker used to sit here, offering
+ * EUR/USD/GBP with static conversion rates — meaningless for a Senegalese shop
+ * and a mispricing risk, so prices are now shown exactly as recorded.
  */
 export function Price({
   amount,
-  baseCurrency = "EUR",
+  baseCurrency = "XOF",
   className,
 }: {
   amount: string | number;
   baseCurrency?: string;
   className?: string;
 }) {
-  const currency = useCurrency((s) => s.currency);
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => setMounted(true), []);
-
-  const isKnown = CURRENCIES.some((c) => c.code === baseCurrency);
-  const base: CurrencyCode = isKnown ? (baseCurrency as CurrencyCode) : "EUR";
-
   const value = typeof amount === "string" ? parseFloat(amount) : amount;
-
-  if (!mounted || !isKnown || currency === base) {
-    return <span className={className}>{formatPrice(value, baseCurrency)}</span>;
-  }
-
-  const converted = convert(value, base, currency);
-  const locale = CURRENCIES.find((c) => c.code === currency)?.locale ?? "fr-FR";
-  return <span className={className}>{formatPrice(converted, currency, locale)}</span>;
+  return <span className={className}>{formatPrice(value, baseCurrency)}</span>;
 }

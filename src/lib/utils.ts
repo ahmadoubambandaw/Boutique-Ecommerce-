@@ -9,8 +9,8 @@ export function cn(...inputs: ClassValue[]) {
 /** Format a money amount using the store's currency. */
 export function formatPrice(
   amount: number | string,
-  currencyCode = "EUR",
-  locale = "fr-FR",
+  currencyCode = "XOF",
+  locale = "fr-SN",
 ) {
   const value = typeof amount === "string" ? parseFloat(amount) : amount;
   return new Intl.NumberFormat(locale, {
