@@ -16,6 +16,7 @@ import {
   type AdminSession,
 } from "./admin-session";
 import { isDbConfigured } from "@/lib/db/client";
+import { pingRestApi } from "@/lib/db/wake";
 
 export type AdminAuthState = { error?: string };
 
@@ -51,11 +52,14 @@ export async function adminLoginAction(
   try {
     admin = await verifyAdminCredentials(email, password);
   } catch {
-    // DB unreachable (pooler saturated, project restarting…) — say so instead
-    // of crashing with a 500 or blaming the credentials.
+    // DB unreachable (pooler saturated, project hibernated…) — say so instead
+    // of crashing with a 500 or blaming the credentials. A hibernated Supabase
+    // project only wakes on an HTTP API call, so nudge it here: the next
+    // attempt, a few seconds later, will usually succeed.
+    await pingRestApi().catch(() => undefined);
     return {
       error:
-        "Base de données momentanément indisponible. Réessayez dans quelques instants.",
+        "Base de données en cours de réveil. Patientez 30 secondes puis réessayez.",
     };
   }
   if (!admin) {
