@@ -18,8 +18,13 @@ import { captureMessage } from "@/lib/monitoring";
 
 const DEFAULT_SUPABASE_URL = "https://ggqxiaffhawkjzzhvpze.supabase.co";
 
-/** Publishable ("anon") key — public by design, safe to ship client-side. */
-const DEFAULT_PUBLISHABLE_KEY = "sb_publishable_nt5k5TSBw-eePD6Od2sY2Q_vJJXs9YY";
+/**
+ * Legacy anon key (JWT) — public by design, safe to ship client-side. Preferred
+ * over the newer `sb_publishable_…` format here because every Supabase gateway
+ * version accepts it.
+ */
+const DEFAULT_PUBLISHABLE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdncXhpYWZmaGF3a2p6emh2cHplIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMTI2MjQsImV4cCI6MjA5OTc4ODYyNH0.RJHNfoP4xvrrQd2KLGOQBuhM4rcxVC5c5X97QK5ZQ-c";
 
 function baseUrl(): string {
   return (
@@ -37,8 +42,16 @@ function anonKey(): string {
   );
 }
 
-/** Fire the HTTP request that Supabase counts as activity. */
-export async function pingRestApi(): Promise<{ ok: boolean; status: number }> {
+/**
+ * Fire the HTTP request that Supabase counts as activity. The response body is
+ * returned too: a paused/hibernated project answers with a descriptive payload,
+ * which is the only way to tell that state apart from an auth rejection.
+ */
+export async function pingRestApi(): Promise<{
+  ok: boolean;
+  status: number;
+  body: string;
+}> {
   const key = anonKey();
   try {
     const res = await fetch(`${baseUrl()}/rest/v1/`, {
@@ -46,10 +59,11 @@ export async function pingRestApi(): Promise<{ ok: boolean; status: number }> {
       cache: "no-store",
       signal: AbortSignal.timeout(15_000),
     });
+    const body = await res.text().catch(() => "");
     // Any HTTP answer (even 401) proves the platform is serving the project.
-    return { ok: true, status: res.status };
-  } catch {
-    return { ok: false, status: 0 };
+    return { ok: true, status: res.status, body: body.slice(0, 300) };
+  } catch (e) {
+    return { ok: false, status: 0, body: String(e).slice(0, 300) };
   }
 }
 
@@ -68,9 +82,25 @@ export async function pingPostgres(): Promise<boolean> {
 export type WakeResult = {
   awake: boolean;
   restStatus: number;
+  restBody: string;
+  pgError: string;
   attempts: number;
   elapsedMs: number;
 };
+
+/** Run a trivial query, returning the failure message when it does not work. */
+async function tryQuery(): Promise<string> {
+  const db = getDb();
+  if (!db) return "no DATABASE_URL";
+  try {
+    await db.execute(sql`select 1`);
+    return "";
+  } catch (e) {
+    const err = e instanceof Error ? e : new Error(String(e));
+    const cause = (err as { cause?: unknown }).cause;
+    return `${err.message}${cause ? ` | cause: ${String(cause)}` : ""}`.slice(0, 300);
+  }
+}
 
 /**
  * Ping the REST API, then poll Postgres until it answers or the budget runs
@@ -79,25 +109,38 @@ export type WakeResult = {
 export async function wakeDatabase(budgetMs = 45_000): Promise<WakeResult> {
   const started = Date.now();
 
-  // Already up? Nothing to do.
-  if (await pingPostgres()) {
-    return { awake: true, restStatus: 200, attempts: 0, elapsedMs: Date.now() - started };
-  }
-
-  const { status } = await pingRestApi();
+  const { status, body } = await pingRestApi();
 
   let attempts = 0;
+  let pgError = "";
   while (Date.now() - started < budgetMs) {
     attempts += 1;
-    if (await pingPostgres()) {
-      return { awake: true, restStatus: status, attempts, elapsedMs: Date.now() - started };
+    pgError = await tryQuery();
+    if (!pgError) {
+      return {
+        awake: true,
+        restStatus: status,
+        restBody: body,
+        pgError: "",
+        attempts,
+        elapsedMs: Date.now() - started,
+      };
     }
     await new Promise((r) => setTimeout(r, 3_000));
   }
 
-  captureMessage("database still hibernated after wake attempt", {
+  captureMessage("database still unreachable after wake attempt", {
     restStatus: status,
+    restBody: body,
+    pgError,
     attempts,
   });
-  return { awake: false, restStatus: status, attempts, elapsedMs: Date.now() - started };
+  return {
+    awake: false,
+    restStatus: status,
+    restBody: body,
+    pgError,
+    attempts,
+    elapsedMs: Date.now() - started,
+  };
 }
