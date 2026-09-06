@@ -5,6 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { SlidersHorizontal, X } from "lucide-react";
 import type { Product } from "@/lib/shopify/types";
 import { ProductGrid } from "@/components/product/product-grid";
+import { CatalogEmpty } from "@/components/catalog/catalog-empty";
 import { cn } from "@/lib/utils";
 
 const SORTS = [
@@ -177,6 +178,19 @@ export function CatalogView({
     </div>
   );
 
+  // Nothing in the source at all (empty shop or a catalogue outage): filters and
+  // sorting would be meaningless, so show a helpful contact card instead.
+  if (products.length === 0) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <h1 className="mb-8 text-3xl font-semibold tracking-tight sm:text-4xl">
+          {title}
+        </h1>
+        <CatalogEmpty />
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -220,7 +234,14 @@ export function CatalogView({
         <aside className="hidden lg:block">
           <div className="sticky top-24">{FiltersPanel}</div>
         </aside>
-        <ProductGrid products={filtered} />
+        {filtered.length > 0 ? (
+          <ProductGrid products={filtered} />
+        ) : (
+          <CatalogEmpty
+            title="Aucun produit ne correspond à ces filtres"
+            message="Essayez d'élargir votre recherche, ou dites-nous ce que vous cherchez : nous avons peut-être le produit en stock."
+          />
+        )}
       </div>
 
       {/* Mobile filters drawer */}

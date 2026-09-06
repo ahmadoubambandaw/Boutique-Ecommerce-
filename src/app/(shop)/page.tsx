@@ -11,6 +11,7 @@ import { ProductGrid } from "@/components/product/product-grid";
 import { CollectionCard } from "@/components/collection/collection-card";
 import { SectionHeader } from "@/components/ui/section-header";
 import { RecentlyViewed } from "@/components/product/recently-viewed";
+import { CatalogEmpty } from "@/components/catalog/catalog-empty";
 import { JsonLd } from "@/components/seo/json-ld";
 import { appUrl } from "@/lib/seo";
 
@@ -42,7 +43,7 @@ export default async function HomePage() {
 
       <Hero tagline={tenant.branding.tagline ?? ""} />
 
-      <FeaturedSlider products={featured} />
+      {featured.length > 0 && <FeaturedSlider products={featured} />}
 
       <Features />
 
@@ -73,7 +74,11 @@ export default async function HomePage() {
           title="Produits populaires"
           href="/products"
         />
-        <ProductGrid products={trending} />
+        {trending.length > 0 ? (
+          <ProductGrid products={trending} />
+        ) : (
+          <CatalogEmpty />
+        )}
       </section>
 
       {/* Editorial band */}

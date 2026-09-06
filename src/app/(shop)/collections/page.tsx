@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { listCollectionsWithCounts } from "@/lib/catalog";
 import { CollectionCard } from "@/components/collection/collection-card";
 import { SectionHeader } from "@/components/ui/section-header";
+import { CatalogEmpty } from "@/components/catalog/catalog-empty";
 
 export const revalidate = 60;
 
@@ -17,16 +18,20 @@ export default async function CollectionsPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <SectionHeader eyebrow="Explorez" title="Toutes les collections" />
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-        {collections.map(({ collection, count }, i) => (
-          <CollectionCard
-            key={collection.id}
-            collection={collection}
-            count={count}
-            index={i}
-          />
-        ))}
-      </div>
+      {collections.length === 0 ? (
+        <CatalogEmpty title="Nos collections arrivent" />
+      ) : (
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+          {collections.map(({ collection, count }, i) => (
+            <CollectionCard
+              key={collection.id}
+              collection={collection}
+              count={count}
+              index={i}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
