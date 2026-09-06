@@ -5,6 +5,7 @@ import {
   pingPostgres,
   probeConnections,
   projectRef,
+  findPoolerCluster,
 } from "@/lib/db/wake";
 
 /**
@@ -24,6 +25,41 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 export async function GET(request: Request) {
+  const url = new URL(request.url);
+
+  // Which pooler cluster hosts a given project? Uses no credentials, and only
+  // ever contacts Supabase's own pooler hostnames.
+  const lookupRef = url.searchParams.get("cluster");
+  if (lookupRef) {
+    if (!/^[a-z0-9]{16,32}$/.test(lookupRef)) {
+      return NextResponse.json(
+        { ok: false, reason: "invalid project ref" },
+        { status: 400 },
+      );
+    }
+    const region = url.searchParams.get("region") ?? "eu-west-3";
+    if (!/^[a-z]{2}-[a-z]+-\d$/.test(region)) {
+      return NextResponse.json(
+        { ok: false, reason: "invalid region" },
+        { status: 400 },
+      );
+    }
+    const clusters = await findPoolerCluster(lookupRef, region);
+    const match = clusters.find((c) => c.hostsProject);
+    return NextResponse.json(
+      {
+        ok: Boolean(match),
+        projectRef: lookupRef,
+        region,
+        clusters,
+        message: match
+          ? `Le projet est hébergé sur ${match.host}`
+          : "Aucun cluster ne reconnaît ce projet.",
+      },
+      { status: match ? 200 : 404 },
+    );
+  }
+
   if (!isDbConfigured()) {
     return NextResponse.json(
       { ok: false, reason: "DATABASE_URL not configured" },
@@ -31,7 +67,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const params = new URL(request.url).searchParams;
+  const params = url.searchParams;
   const wake = params.get("wake");
 
   // Which pooler endpoint actually answers? Only ever reports redacted URLs.

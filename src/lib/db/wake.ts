@@ -228,3 +228,61 @@ export async function probeConnections(): Promise<ProbeResult[]> {
   }
   return results;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Pooler cluster lookup
+   ───────────────────────────────────────────────────────────── */
+
+/** Regional pooler clusters Supabase spreads projects across. */
+const POOLER_CLUSTERS = ["aws-0", "aws-1"] as const;
+
+export type ClusterResult = {
+  host: string;
+  /** True when this cluster knows the project (whatever the credentials). */
+  hostsProject: boolean;
+  detail: string;
+};
+
+/**
+ * Find which pooler cluster serves a project, using no credentials.
+ *
+ * Supavisor resolves the tenant *before* authenticating, so a deliberately
+ * invalid password yields two distinguishable answers: "Tenant or user not
+ * found" on a cluster that does not host the project, versus an authentication
+ * failure on the one that does. That is enough to identify the right hostname
+ * when the dashboard — the only place it is displayed — is unreachable.
+ */
+export async function findPoolerCluster(
+  ref: string,
+  region: string,
+): Promise<ClusterResult[]> {
+  const { default: postgres } = await import("postgres");
+  const results: ClusterResult[] = [];
+
+  for (const cluster of POOLER_CLUSTERS) {
+    const host = `${cluster}-${region}.pooler.supabase.com`;
+    const client = postgres({
+      host,
+      port: 6543,
+      database: "postgres",
+      username: `postgres.${ref}`,
+      password: "invalid-probe-password",
+      prepare: false,
+      max: 1,
+      connect_timeout: 10,
+      idle_timeout: 5,
+      ssl: "require",
+    });
+    try {
+      await client`select 1`;
+      // Should not happen with a bogus password, but a success still proves it.
+      results.push({ host, hostsProject: true, detail: "connected" });
+    } catch (e) {
+      const msg = (e instanceof Error ? e.message : String(e)).slice(0, 160);
+      const unknownTenant = /tenant|user not found|ENOTFOUND/i.test(msg);
+      results.push({ host, hostsProject: !unknownTenant, detail: msg });
+    }
+    await client.end({ timeout: 5 }).catch(() => {});
+  }
+  return results;
+}
