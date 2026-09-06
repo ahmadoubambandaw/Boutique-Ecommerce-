@@ -16,6 +16,10 @@ const nextConfig: NextConfig = {
         hostname: "*.supabase.co",
         pathname: "/storage/v1/object/public/**",
       },
+      // Supplier product photography, pending our own shots. Next/Image
+      // re-encodes and caches these on our side, so the origin is hit once.
+      { protocol: "https", hostname: "senboutiquesecurite.com" },
+      { protocol: "https", hostname: "www.senboutiquesecurite.com" },
       // Demo catalogue imagery (used only when no Shopify store is connected).
       { protocol: "https", hostname: "images.unsplash.com" },
     ],
