@@ -84,16 +84,39 @@
 
 @layer utilities {
   /* Glassmorphism surface */
+  /*
+   * Frosted surfaces (header, drawers, cart, search, toasts).
+   *
+   * These start OPAQUE. The frosted look needs backdrop-filter, and where that
+   * does not render — older GPUs, hardware acceleration switched off, some
+   * embedded browsers — a translucent panel lets the page show straight
+   * through, leaving navigation and cart text unreadable over whatever
+   * scrolls behind it. The blur is layered back on only where it works.
+   */
   .glass {
-    background-color: rgba(var(--glass), 0.6);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background-color: hsl(var(--background));
     border: 1px solid hsl(var(--border) / 0.6);
   }
   .glass-strong {
-    background-color: rgba(var(--glass), 0.8);
-    backdrop-filter: blur(28px) saturate(200%);
-    -webkit-backdrop-filter: blur(28px) saturate(200%);
+    background-color: hsl(var(--background));
+  }
+  @supports (
+    (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+  ) {
+    .glass {
+      background-color: rgba(var(--glass), 0.6);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+    }
+    .glass-strong {
+      background-color: rgba(var(--glass), 0.85);
+      backdrop-filter: blur(28px) saturate(200%);
+      -webkit-backdrop-filter: blur(28px) saturate(200%);
+    }
+  }
+  /* Sticky header: same surface, plus a hairline shadow to lift it off the page. */
+  .header-surface {
+    box-shadow: 0 1px 12px hsl(var(--foreground) / 0.06);
   }
   /* Premium hover lift */
   .lift {

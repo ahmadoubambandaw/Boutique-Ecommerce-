@@ -49,7 +49,9 @@ export function Header({
       <header
         className={cn(
           "sticky top-0 z-50 w-full transition-all duration-500",
-          scrolled ? "glass-strong border-b border-[hsl(var(--border))]" : "bg-transparent",
+          scrolled
+            ? "glass-strong header-surface border-b border-[hsl(var(--border))]"
+            : "bg-transparent",
         )}
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
