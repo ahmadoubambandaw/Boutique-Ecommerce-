@@ -1,5 +1,5 @@
 /* Boutique service worker — offline app shell + graceful fallback. */
-const CACHE = "boutique-v5";
+const CACHE = "boutique-v6";
 const PRECACHE = ["/", "/offline", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", (event) => {

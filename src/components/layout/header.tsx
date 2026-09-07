@@ -28,7 +28,6 @@ export function Header({
   storeName?: string;
   logoUrl?: string | null;
 }) {
-  const [scrolled, setScrolled] = React.useState(false);
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [searchOpen, setSearchOpen] = React.useState(false);
 
@@ -37,21 +36,11 @@ export function Header({
   const openCart = useCart((s) => s.open);
   const wishlistCount = useWishlist((s) => s.items.length);
 
-  React.useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
     <>
       <header
         className={cn(
-          "sticky top-0 z-50 w-full transition-all duration-500",
-          scrolled
-            ? "glass-strong header-surface border-b border-[hsl(var(--border))]"
-            : "bg-transparent",
+          "glass-strong header-surface sticky top-0 z-50 w-full border-b border-[hsl(var(--border))]",
         )}
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
