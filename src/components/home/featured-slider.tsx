@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { supplierImageLoader } from "@/lib/supplier-image-loader";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode } from "swiper/modules";
@@ -65,6 +66,7 @@ function Card({ product }: { product: Product }) {
         <div className="relative aspect-square overflow-hidden rounded-2xl bg-[hsl(214_30%_97%)]">
           {image && (
             <Image
+              loader={supplierImageLoader}
               src={image.url}
               alt={image.altText ?? product.title}
               fill

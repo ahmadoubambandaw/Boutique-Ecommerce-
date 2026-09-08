@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { supplierImageLoader } from "@/lib/supplier-image-loader";
 import Link from "next/link";
 import { useRecentlyViewed } from "@/lib/store/recently-viewed";
 import { formatPrice } from "@/lib/utils";
@@ -24,6 +25,7 @@ export function RecentlyViewed() {
             <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-[hsl(var(--muted))]">
               {item.image && (
                 <Image
+                  loader={supplierImageLoader}
                   src={item.image}
                   alt={item.title}
                   fill

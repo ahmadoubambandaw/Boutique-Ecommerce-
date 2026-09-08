@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { supplierImageLoader } from "@/lib/supplier-image-loader";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Heart, Plus } from "lucide-react";
@@ -79,6 +80,7 @@ export function ProductCard({
         <div className="lift relative aspect-[4/5] overflow-hidden rounded-2xl bg-[hsl(var(--muted))]">
           {image && (
             <Image
+              loader={supplierImageLoader}
               src={image.url}
               alt={image.altText ?? product.title}
               fill
@@ -89,6 +91,7 @@ export function ProductCard({
           )}
           {hoverImage && (
             <Image
+              loader={supplierImageLoader}
               src={hoverImage.url}
               alt={product.title}
               fill

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { supplierImageLoader } from "@/lib/supplier-image-loader";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { ShopifyImage } from "@/lib/shopify/types";
@@ -48,6 +49,7 @@ export function ProductGallery({
               aria-label={`Voir l'image ${i + 1}`}
             >
               <Image
+                loader={supplierImageLoader}
                 src={img.url}
                 alt={img.altText ?? `${title} ${i + 1}`}
                 fill
@@ -77,6 +79,7 @@ export function ProductGallery({
               className="absolute inset-0"
             >
               <Image
+                loader={supplierImageLoader}
                 src={current.url}
                 alt={current.altText ?? title}
                 fill

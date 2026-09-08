@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { supplierImageLoader } from "@/lib/supplier-image-loader";
 import { ImagePlus, Link2, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/utils";
@@ -112,6 +113,7 @@ export function ProductManager({
                       <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-[hsl(var(--muted))]">
                         {p.images[0] && (
                           <Image
+                            loader={supplierImageLoader}
                             src={p.images[0].url}
                             alt={p.title}
                             fill

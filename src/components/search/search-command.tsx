@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { supplierImageLoader } from "@/lib/supplier-image-loader";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
@@ -155,6 +156,7 @@ export function SearchCommand({
                         <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-[hsl(var(--muted))]">
                           {p.featuredImage && (
                             <Image
+                              loader={supplierImageLoader}
                               src={p.featuredImage.url}
                               alt={p.featuredImage.altText ?? p.title}
                               fill

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { supplierImageLoader } from "@/lib/supplier-image-loader";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
@@ -122,6 +123,7 @@ export function CartDrawer() {
                         >
                           {line.image && (
                             <Image
+                              loader={supplierImageLoader}
                               src={line.image}
                               alt={line.title}
                               fill
