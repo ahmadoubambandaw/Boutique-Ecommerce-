@@ -11,7 +11,7 @@ export const CONTACT = {
   phoneTel: "+221705442602",
   whatsapp: "+221 76 262 63 14",
   whatsappNumber: "221762626314", // wa.me format
-  email: "commerciale.gse@gmail.com",
+  email: "commerciale.gsec@gmail.com",
   address: "Zac Mbao, Dakar, Sénégal",
   city: "Dakar",
   country: "Sénégal",
