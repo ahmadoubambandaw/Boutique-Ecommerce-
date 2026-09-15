@@ -175,7 +175,7 @@ export function TenantSettingsForm({ tenant }: { tenant: Tenant }) {
       <section className="space-y-4">
         <h3 className="font-semibold">Bannière d'annonce</h3>
         <Field label="Message">
-          <Input name="bannerMessage" defaultValue={banner?.message ?? ""} placeholder="Livraison offerte dès 50€…" />
+          <Input name="bannerMessage" defaultValue={banner?.message ?? ""} placeholder="Livraison offerte dès 25 000 FCFA…" />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Lien (optionnel)">

@@ -6,7 +6,7 @@ import { SlidersHorizontal, X } from "lucide-react";
 import type { Product } from "@/lib/shopify/types";
 import { ProductGrid } from "@/components/product/product-grid";
 import { CatalogEmpty } from "@/components/catalog/catalog-empty";
-import { cn } from "@/lib/utils";
+import { cn, formatPrice } from "@/lib/utils";
 
 const SORTS = [
   { value: "latest", label: "Nouveautés" },
@@ -107,7 +107,7 @@ export function CatalogView({
       {/* Price */}
       <div>
         <p className="mb-3 text-sm font-medium">
-          Prix max : {maxPrice ?? facets.priceMax} €
+          Prix max : {formatPrice(maxPrice ?? facets.priceMax)}
         </p>
         <input
           type="range"
