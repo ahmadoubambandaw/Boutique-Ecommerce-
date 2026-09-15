@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PageHero } from "@/components/ui/page-hero";
 import { JsonLd } from "@/components/seo/json-ld";
+import { CONTACT } from "@/lib/contact";
 
 export const metadata: Metadata = {
   title: "FAQ",
@@ -28,7 +29,7 @@ const FAQ = [
   },
   {
     q: "Comment retourner ou échanger un article ?",
-    a: "Si un article présente un défaut ou ne correspond pas à votre commande, contactez-nous sous 48h après réception à commerciale.gse@gmail.com ou au +221 70 544 26 02 : nous organisons l'échange ou le remboursement selon l'état du produit.",
+    a: `Si un article présente un défaut ou ne correspond pas à votre commande, contactez-nous sous 48h après réception à ${CONTACT.email} ou au ${CONTACT.phone} : nous organisons l'échange ou le remboursement selon l'état du produit.`,
   },
   {
     q: "Puis-je suivre ma commande ?",
