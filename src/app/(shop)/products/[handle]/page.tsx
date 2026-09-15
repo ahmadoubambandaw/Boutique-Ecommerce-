@@ -67,6 +67,22 @@ export default async function ProductPage({ params }: Params) {
           },
         }}
       />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Accueil", item: appUrl() },
+            { "@type": "ListItem", position: 2, name: "Catalogue", item: `${appUrl()}/products` },
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: product.title,
+              item: `${appUrl()}/products/${product.handle}`,
+            },
+          ],
+        }}
+      />
 
       {/* Breadcrumb */}
       <nav className="mb-6 flex items-center gap-1 text-sm text-[hsl(var(--muted-foreground))]">
