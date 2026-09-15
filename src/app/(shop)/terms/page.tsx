@@ -3,16 +3,17 @@ import { PageHero } from "@/components/ui/page-hero";
 
 export const metadata: Metadata = {
   title: "Conditions générales",
-  description: "Conditions générales de vente et d'utilisation.",
+  description:
+    "Conditions générales de vente de GSE — Global Safety Équipement : prix en FCFA, livraison à Dakar, paiement à la livraison ou mobile money.",
   alternates: { canonical: "/terms" },
 };
 
 const SECTIONS = [
-  ["Objet", "Les présentes conditions régissent l'utilisation du site et les ventes conclues. Toute commande implique l'acceptation pleine et entière des présentes conditions."],
-  ["Prix", "Les prix sont indiqués en euros toutes taxes comprises. Ils peuvent être modifiés à tout moment mais les produits sont facturés sur la base des tarifs en vigueur au moment de la commande."],
-  ["Commande", "La vente est réputée conclue à la confirmation du paiement, traité de manière sécurisée par Shopify. Un e-mail de confirmation récapitule votre commande."],
-  ["Livraison", "Les délais de livraison sont indicatifs. La livraison est offerte dès 50€ d'achat en France métropolitaine. Les risques sont transférés à la remise du colis."],
-  ["Rétractation & retours", "Vous disposez d'un délai de 30 jours pour retourner un article. Les frais de retour sont pris en charge. Le remboursement intervient sous 14 jours après réception."],
+  ["Objet", "Les présentes conditions régissent l'utilisation du site et les ventes conclues par GSE — Global Safety Équipement. Toute commande implique l'acceptation pleine et entière des présentes conditions."],
+  ["Prix", "Les prix sont indiqués en francs CFA (FCFA / XOF), toutes taxes comprises. Ils peuvent être modifiés à tout moment, mais les produits sont facturés sur la base des tarifs en vigueur au moment de la commande."],
+  ["Commande", "La commande est enregistrée dès sa validation sur le site. Elle est confirmée par notre équipe par téléphone avant expédition. Aucun paiement en ligne n'est requis à la commande : le règlement s'effectue à la livraison (espèces) ou par mobile money (Wave / Orange Money)."],
+  ["Livraison", "Nous livrons principalement dans la région de Dakar, sous 24 à 72h ouvrées selon la disponibilité du produit et votre localisation. Les frais de livraison s'élèvent à 1 000 FCFA et sont offerts dès 25 000 FCFA d'achat. Pour une livraison hors de Dakar, contactez-nous au préalable pour connaître les délais et modalités. Les risques sont transférés au client à la remise du colis."],
+  ["Rétractation & retours", "En cas de défaut ou de non-conformité constaté à la réception, contactez-nous sous 48h à commerciale.gse@gmail.com ou au +221 70 544 26 02. Selon l'état du produit, nous organisons l'échange ou le remboursement."],
   ["Responsabilité", "Notre responsabilité ne saurait être engagée en cas de force majeure ou de faute du client. Les photographies des produits sont non contractuelles."],
 ];
 
@@ -22,7 +23,7 @@ export default function TermsPage() {
       <PageHero eyebrow="Légal" title="Conditions générales" />
       <div className="mx-auto max-w-2xl space-y-8 px-4 py-16 sm:px-6 lg:px-8">
         <p className="text-sm text-[hsl(var(--muted-foreground))]">
-          Dernière mise à jour : 16 juillet 2026
+          Dernière mise à jour : 15 septembre 2026
         </p>
         {SECTIONS.map(([title, body], i) => (
           <section key={title}>
