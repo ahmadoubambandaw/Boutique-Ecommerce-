@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Star } from "lucide-react";
 import type { Product } from "@/lib/shopify/types";
 import { cn } from "@/lib/utils";
 
@@ -71,48 +70,19 @@ export function ProductTabs({ product }: { product: Product }) {
             )}
 
             {tab === "Avis" && (
-              <div className="max-w-2xl space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="flex">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={cn(
-                          "h-5 w-5",
-                          i < 4
-                            ? "fill-amber-400 text-amber-400"
-                            : "text-[hsl(var(--border))]",
-                        )}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm text-[hsl(var(--muted-foreground))]">
-                    4,6 / 5 · 128 avis vérifiés
-                  </span>
-                </div>
-                {[
-                  { name: "Camille", text: "Qualité irréprochable, coupe parfaite. Je recommande !" },
-                  { name: "Thomas", text: "Livraison rapide et produit conforme. Très satisfait." },
-                ].map((r) => (
-                  <div key={r.name} className="rounded-2xl border border-[hsl(var(--border))] p-4">
-                    <div className="mb-1 flex items-center gap-2">
-                      <span className="font-medium">{r.name}</span>
-                      <span className="text-xs text-[hsl(var(--muted-foreground))]">
-                        Achat vérifié
-                      </span>
-                    </div>
-                    <p className="text-sm text-[hsl(var(--muted-foreground))]">{r.text}</p>
-                  </div>
-                ))}
+              <div className="max-w-2xl">
+                <p className="text-sm text-[hsl(var(--muted-foreground))]">
+                  Aucun avis pour le moment sur ce produit.
+                </p>
               </div>
             )}
 
             {tab === "FAQ" && (
               <div className="max-w-2xl space-y-3">
                 {[
-                  ["Quels sont les délais de livraison ?", "2 à 4 jours ouvrés en France métropolitaine."],
-                  ["Comment retourner un article ?", "Retours gratuits sous 30 jours via votre espace client."],
-                  ["Les tailles sont-elles conformes ?", "Oui, consultez le guide des tailles sur la fiche produit."],
+                  ["Quels sont les délais de livraison ?", "En général sous 24 à 72h ouvrées à Dakar. Contactez-nous pour une livraison en dehors de Dakar."],
+                  ["Comment retourner ou échanger un article ?", "En cas de défaut constaté à la réception, contactez-nous sous 48h : nous organisons l'échange ou le remboursement selon l'état du produit."],
+                  ["Cet équipement est-il certifié ?", "Oui, nos EPI et équipements de sécurité incendie sont conformes aux normes EN / ISO en vigueur."],
                 ].map(([q, a]) => (
                   <details
                     key={q}

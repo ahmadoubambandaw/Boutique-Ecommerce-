@@ -13,11 +13,11 @@ export const metadata: Metadata = {
 const FAQ = [
   {
     q: "Quels sont les délais et zones de livraison ?",
-    a: "Nous livrons principalement dans la région de Dakar, en général sous 24 à 72h ouvrées selon votre localisation et la disponibilité du produit. Pour une livraison en dehors de Dakar, contactez-nous au +221 70 544 26 02 ou par WhatsApp pour connaître les délais et modalités.",
+    a: `Nous livrons principalement dans la région de Dakar, en général sous 24 à 72h ouvrées selon votre localisation et la disponibilité du produit. Pour une livraison en dehors de Dakar, contactez-nous au ${CONTACT.phonesJoined} ou par WhatsApp pour connaître les délais et modalités.`,
   },
   {
     q: "La livraison est-elle gratuite ?",
-    a: "La livraison coûte 1 000 FCFA et devient gratuite dès 25 000 FCFA d'achat.",
+    a: "La livraison coûte 1 000 FCFA et devient gratuite dès 100 000 FCFA d'achat.",
   },
   {
     q: "Quels moyens de paiement acceptez-vous ?",
@@ -29,7 +29,7 @@ const FAQ = [
   },
   {
     q: "Comment retourner ou échanger un article ?",
-    a: `Si un article présente un défaut ou ne correspond pas à votre commande, contactez-nous sous 48h après réception à ${CONTACT.email} ou au ${CONTACT.phone} : nous organisons l'échange ou le remboursement selon l'état du produit.`,
+    a: `Si un article présente un défaut ou ne correspond pas à votre commande, contactez-nous sous 48h après réception à ${CONTACT.email} ou au ${CONTACT.phonesJoined} : nous organisons l'échange ou le remboursement selon l'état du produit.`,
   },
   {
     q: "Puis-je suivre ma commande ?",

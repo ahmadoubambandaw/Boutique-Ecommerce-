@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Newsletter } from "./newsletter";
-import { CONTACT } from "@/lib/contact";
+import { CONTACT, PHONES } from "@/lib/contact";
 
 const COLUMNS = [
   {
@@ -19,6 +19,7 @@ const COLUMNS = [
       { label: "Contact", href: "/contact" },
       { label: "FAQ", href: "/faq" },
       { label: "Suivi de commande", href: "/track" },
+      { label: "Service après-vente", href: "/service-apres-vente" },
     ],
   },
   {
@@ -50,14 +51,16 @@ export function Footer({ storeName = "GSE" }: { storeName?: string }) {
               sécurité incendie.
             </p>
             <ul className="mt-4 space-y-2 text-sm text-[hsl(var(--muted-foreground))]">
-              <li>
-                <a
-                  href={`tel:${CONTACT.phoneTel}`}
-                  className="flex items-center gap-2 hover:text-[hsl(var(--foreground))]"
-                >
-                  <Phone className="h-4 w-4" /> {CONTACT.phone}
-                </a>
-              </li>
+              {PHONES.map((p) => (
+                <li key={p.tel}>
+                  <a
+                    href={`tel:${p.tel}`}
+                    className="flex items-center gap-2 hover:text-[hsl(var(--foreground))]"
+                  >
+                    <Phone className="h-4 w-4" /> {p.display}
+                  </a>
+                </li>
+              ))}
               <li>
                 <a
                   href={`mailto:${CONTACT.email}`}
