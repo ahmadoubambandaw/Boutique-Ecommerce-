@@ -74,8 +74,8 @@ export function Hero({ tagline }: { tagline: string }) {
                 style={{ transformPerspective: 1000 }}
               >
                 <Image
-                  src="/hero-shoe.png"
-                  alt="Chaussures de sécurité S3 — GSE"
+                  src="https://cdktjngwukkeededkvji.supabase.co/storage/v1/object/public/product-images/gse-upload/chaussures-de-securite-light-bearer-noir.png"
+                  alt="Chaussures de sécurité Light Bearer noir — GSE"
                   width={329}
                   height={472}
                   priority
@@ -90,7 +90,7 @@ export function Hero({ tagline }: { tagline: string }) {
               className="pointer-events-none mx-auto -mt-1 h-16 w-[62vw] max-w-[300px] overflow-hidden opacity-15 lg:max-w-[380px] [mask-image:linear-gradient(to_bottom,black,transparent_80%)]"
             >
               <Image
-                src="/hero-shoe.png"
+                src="https://cdktjngwukkeededkvji.supabase.co/storage/v1/object/public/product-images/gse-upload/chaussures-de-securite-light-bearer-noir.png"
                 alt=""
                 width={329}
                 height={472}
