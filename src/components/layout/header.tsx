@@ -17,6 +17,7 @@ const NAV: { key: TranslationKey; href: string }[] = [
   { key: "nav.catalog", href: "/products" },
   { key: "nav.collections", href: "/collections" },
   { key: "nav.new", href: "/collections/nouveautes" },
+  { key: "nav.sav", href: "/service-apres-vente" },
   { key: "nav.blog", href: "/blog" },
   { key: "nav.about", href: "/about" },
 ];

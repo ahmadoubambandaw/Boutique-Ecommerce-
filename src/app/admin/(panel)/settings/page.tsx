@@ -17,7 +17,7 @@ export default async function AdminSettingsPage() {
   const rows: [string, string][] = [
     ["Nom de la boutique", tenant.branding.storeName],
     ["Contact e-mail", CONTACT.email],
-    ["Téléphone", CONTACT.phone],
+    ["Téléphone", CONTACT.phonesJoined],
     ["Adresse", CONTACT.address],
     ["Base de données", isDbConfigured() ? "Connectée ✓" : "Non configurée"],
     ["Mode couleur par défaut", tenant.theme.defaultMode],

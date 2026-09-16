@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { PageHero } from "@/components/ui/page-hero";
 import { ContactForm } from "@/components/contact-form";
-import { CONTACT } from "@/lib/contact";
+import { CONTACT, PHONES } from "@/lib/contact";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -22,7 +22,11 @@ export default function ContactPage() {
         <div className="space-y-6">
           {[
             { icon: Mail, label: "E-mail", value: CONTACT.email },
-            { icon: Phone, label: "Téléphone", value: CONTACT.phone },
+            {
+              icon: Phone,
+              label: "Téléphone",
+              value: PHONES.map((p) => p.display).join(" · "),
+            },
             { icon: MessageCircle, label: "WhatsApp", value: CONTACT.whatsapp },
             { icon: MapPin, label: "Adresse", value: CONTACT.address },
           ].map((c) => (

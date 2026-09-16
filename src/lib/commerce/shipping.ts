@@ -4,7 +4,7 @@
  * components too.
  */
 export const DELIVERY_FEE = 1000;
-export const FREE_DELIVERY_ABOVE = 25000;
+export const FREE_DELIVERY_ABOVE = 100000;
 
 /** Delivery fee for a given subtotal. */
 export function deliveryFeeFor(subtotal: number): number {

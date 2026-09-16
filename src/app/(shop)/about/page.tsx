@@ -175,7 +175,7 @@ export default function AboutPage() {
           <h2 className="text-2xl font-semibold">Un besoin en sécurité ?</h2>
           <p className="max-w-xl text-sm text-[hsl(var(--muted-foreground))]">
             Notre équipe vous conseille et vous accompagne. Contactez-nous au{" "}
-            {CONTACT.phone} ou par e-mail à {CONTACT.email}.
+            {CONTACT.phonesJoined} ou par e-mail à {CONTACT.email}.
           </p>
           <div className="mt-2 flex flex-wrap justify-center gap-3">
             <Link
