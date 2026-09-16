@@ -115,7 +115,7 @@ export function Hero({ tagline }: { tagline: string }) {
               À la une
             </p>
             <h2 className="mt-2 text-2xl font-bold text-[hsl(214_60%_14%)]">
-              Chaussures de sécurité S3
+              Chaussures de sécurité Light Bearer noir
             </h2>
             <p className="mt-1 text-sm font-medium text-[hsl(214_18%_45%)]">
               Norme EN ISO 20345
@@ -137,7 +137,7 @@ export function Hero({ tagline }: { tagline: string }) {
               30 000 FCFA
             </p>
             <Link
-              href="/products/chaussures-securite-s3"
+              href="/products/chaussures-de-securite-light-bearer-noir"
               className="group mt-5 inline-flex items-center gap-2 rounded-full border border-[hsl(214_30%_80%)] px-6 py-3 text-sm font-semibold text-[hsl(214_60%_14%)] transition-colors hover:border-[hsl(var(--accent))] hover:bg-[hsl(214_40%_97%)]"
             >
               Voir le produit
