@@ -47,9 +47,9 @@ function defaultTenant(): Tenant {
       defaultMode: "light",
     },
     seo: {
-      metaTitle: "GSE — Global Safety Équipement",
+      metaTitle: "GSE — Équipement de Protection Individuelle (EPI) au Sénégal",
       metaDescription:
-        "Équipements de protection individuelle (EPI) et solutions de sécurité incendie au Sénégal. Casques, chaussures, gants, extincteurs et plus. Livraison à Dakar, paiement à la livraison ou mobile money.",
+        "GSE (Global Safety Équipement) — équipements de protection individuelle (EPI) et sécurité incendie à Dakar, Sénégal. Casques, chaussures, gants, extincteurs. Livraison à Dakar, paiement à la livraison ou mobile money.",
       ogImageUrl: "/gse-logo.jpg",
     },
     integrations: {
