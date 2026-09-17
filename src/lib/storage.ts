@@ -75,6 +75,7 @@ export async function uploadImage(file: File): Promise<string> {
     {
       method: "POST",
       headers: {
+        apikey: key,
         Authorization: `Bearer ${key}`,
         "Content-Type": file.type,
         "x-upsert": "true",
