@@ -1,4 +1,4 @@
-import { DollarSign, Eye, Percent, ShoppingCart } from "lucide-react";
+import { Banknote, Eye, Percent, ShoppingCart } from "lucide-react";
 import { getDashboardMetrics } from "@/lib/admin/analytics";
 import { formatPrice } from "@/lib/utils";
 import { StatCard } from "@/components/admin/stat-card";
@@ -58,7 +58,7 @@ export default async function AdminDashboard() {
           label="Chiffre d'affaires"
           value={formatPrice(m.revenue, m.currency)}
           change={m.revenueChange}
-          icon={DollarSign}
+          icon={Banknote}
         />
         <StatCard
           label="Commandes"
