@@ -181,6 +181,12 @@ function ProductForm({
   const [images, setImages] = React.useState<string[]>(
     editing?.images.map((i) => i.url) ?? [],
   );
+  const [optionGroups, setOptionGroups] = React.useState<
+    { name: string; values: string }[]
+  >(
+    editing?.options.map((o) => ({ name: o.name, values: o.values.join(", ") })) ??
+      [],
+  );
   const [urlDraft, setUrlDraft] = React.useState("");
   const [uploading, setUploading] = React.useState(false);
   const [pending, setPending] = React.useState(false);
@@ -216,12 +222,36 @@ function ProductForm({
     setImages((prev) => prev.filter((_, i) => i !== idx));
   }
 
+  function addOptionGroup() {
+    setOptionGroups((prev) => [...prev, { name: "", values: "" }]);
+  }
+
+  function updateOptionGroup(idx: number, field: "name" | "values", value: string) {
+    setOptionGroups((prev) =>
+      prev.map((g, i) => (i === idx ? { ...g, [field]: value } : g)),
+    );
+  }
+
+  function removeOptionGroup(idx: number) {
+    setOptionGroups((prev) => prev.filter((_, i) => i !== idx));
+  }
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setPending(true);
     const fd = new FormData(e.currentTarget);
     fd.set("images", images.join("\n"));
+    const cleanOptions = optionGroups
+      .map((g) => ({
+        name: g.name.trim(),
+        values: g.values
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean),
+      }))
+      .filter((g) => g.name && g.values.length > 0);
+    fd.set("optionsJson", JSON.stringify(cleanOptions));
     try {
       const res = await saveProductAction({}, fd);
       if (res.ok) onSaved();
@@ -391,6 +421,60 @@ function ProductForm({
           <p className="mt-1.5 text-xs text-[hsl(var(--muted-foreground))]">
             La première photo est l&apos;image principale. JPG/PNG/WebP, max 5 Mo.
           </p>
+        </div>
+
+        {/* Options (tailles, couleurs…) */}
+        <div className="sm:col-span-2">
+          <label className="mb-1.5 block text-sm font-medium">
+            Options (tailles, couleurs…)
+          </label>
+          <div className="space-y-2">
+            {optionGroups.map((group, idx) => (
+              <div key={idx} className="flex gap-2">
+                <Input
+                  value={group.name}
+                  onChange={(e) => updateOptionGroup(idx, "name", e.target.value)}
+                  placeholder="Ex. Taille"
+                  className="w-32 shrink-0"
+                />
+                <Input
+                  value={group.values}
+                  onChange={(e) => updateOptionGroup(idx, "values", e.target.value)}
+                  placeholder="Ex. L, XL, XXL, XXXL, XXXXL"
+                  className="flex-1"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeOptionGroup(idx)}
+                  className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[hsl(var(--muted-foreground))] hover:bg-red-500/10 hover:text-red-500"
+                  aria-label="Retirer cette option"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-2"
+            onClick={addOptionGroup}
+          >
+            <Plus className="h-4 w-4" /> Ajouter une option
+          </Button>
+          {optionGroups.some((g) => g.name.trim() && g.values.trim()) && (
+            <p className="mt-1.5 text-xs text-[hsl(var(--muted-foreground))]">
+              {optionGroups
+                .filter((g) => g.name.trim() && g.values.trim())
+                .reduce(
+                  (n, g) => n * (g.values.split(",").filter((v) => v.trim()).length || 1),
+                  1,
+                )}{" "}
+              variante(s) seront générées, toutes au même prix et statut de stock
+              que ci-dessus.
+            </p>
+          )}
         </div>
 
         <div className="sm:col-span-2">
