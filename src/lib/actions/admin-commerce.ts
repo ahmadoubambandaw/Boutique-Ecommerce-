@@ -100,9 +100,21 @@ export async function saveProductAction(
     .filter(Boolean);
 
   // The admin form has no size/option editor yet — preserve whatever
-  // options/variants the product already has (e.g. shoe sizes) instead of
-  // wiping them out on every unrelated edit.
+  // options the product already has (e.g. shoe sizes) instead of wiping
+  // them out on every unrelated edit. The form's price/stock fields are
+  // the single source of truth for every variant, though: the storefront
+  // reads price and availability off each variant, not the top-level
+  // product row, so a variant left with its old price would silently
+  // keep showing 0 FCFA even after the admin form says otherwise.
   const existing = d.id ? await getNativeProductById(d.id) : null;
+  const compareAtPrice =
+    d.compareAtPrice && d.compareAtPrice > 0 ? d.compareAtPrice : null;
+  const variants = (existing?.variants ?? []).map((v) => ({
+    ...v,
+    price: d.price,
+    compareAtPrice,
+    available: d.available ?? true,
+  }));
 
   try {
     const saved = await upsertProduct({
@@ -112,17 +124,14 @@ export async function saveProductAction(
       title: d.title,
       description: d.description ?? "",
       price: d.price.toFixed(2),
-      compareAtPrice:
-        d.compareAtPrice && d.compareAtPrice > 0
-          ? d.compareAtPrice.toFixed(2)
-          : null,
+      compareAtPrice: compareAtPrice ? compareAtPrice.toFixed(2) : null,
       currency: "XOF",
       vendor: d.vendor ?? "",
       productType: d.productType ?? "",
       tags,
       images,
       options: existing?.options ?? [],
-      variants: existing?.variants ?? [],
+      variants,
       available: d.available ?? true,
       featured: d.featured ?? false,
     });
