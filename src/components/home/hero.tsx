@@ -134,7 +134,7 @@ export function Hero({ tagline }: { tagline: string }) {
               À partir de
             </p>
             <p className="text-2xl font-bold text-[hsl(214_60%_14%)]">
-              30 000 FCFA
+              15 000 FCFA
             </p>
             <Link
               href="/products/chaussures-de-securite-light-bearer-noir"
