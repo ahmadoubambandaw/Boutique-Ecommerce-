@@ -222,10 +222,17 @@ function ProductForm({
     setPending(true);
     const fd = new FormData(e.currentTarget);
     fd.set("images", images.join("\n"));
-    const res = await saveProductAction({}, fd);
-    setPending(false);
-    if (res.ok) onSaved();
-    else setError(res.error ?? "Erreur.");
+    try {
+      const res = await saveProductAction({}, fd);
+      if (res.ok) onSaved();
+      else setError(res.error ?? "Erreur.");
+    } catch {
+      setError(
+        "Échec de l'enregistrement. Rechargez la page (Ctrl+F5) et réessayez.",
+      );
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
