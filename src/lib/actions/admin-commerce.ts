@@ -8,6 +8,7 @@ import { isDbConfigured } from "@/lib/db/client";
 import {
   countPendingOrders,
   deleteProduct,
+  getNativeProductById,
   updateOrderStatus,
   upsertProduct,
 } from "@/lib/commerce/repository";
@@ -98,6 +99,11 @@ export async function saveProductAction(
     .map((s) => s.trim())
     .filter(Boolean);
 
+  // The admin form has no size/option editor yet — preserve whatever
+  // options/variants the product already has (e.g. shoe sizes) instead of
+  // wiping them out on every unrelated edit.
+  const existing = d.id ? await getNativeProductById(d.id) : null;
+
   try {
     const saved = await upsertProduct({
       id,
@@ -115,8 +121,8 @@ export async function saveProductAction(
       productType: d.productType ?? "",
       tags,
       images,
-      options: [],
-      variants: [],
+      options: existing?.options ?? [],
+      variants: existing?.variants ?? [],
       available: d.available ?? true,
       featured: d.featured ?? false,
     });

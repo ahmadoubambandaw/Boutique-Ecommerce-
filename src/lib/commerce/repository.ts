@@ -97,6 +97,13 @@ export async function getNativeProduct(handle: string): Promise<NativeProduct | 
   return row ? rowToProduct(row) : null;
 }
 
+export async function getNativeProductById(id: string): Promise<NativeProduct | null> {
+  const db = getDb();
+  if (!db) return null;
+  const [row] = await db.select().from(products).where(eq(products.id, id)).limit(1);
+  return row ? rowToProduct(row) : null;
+}
+
 export async function upsertProduct(input: NewProductRow): Promise<NativeProduct | null> {
   const db = getDb();
   if (!db) return null;
