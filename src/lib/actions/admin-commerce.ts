@@ -14,7 +14,7 @@ import {
 } from "@/lib/commerce/repository";
 import { captureError } from "@/lib/monitoring";
 import { isUploadConfigured, uploadImage } from "@/lib/storage";
-import type { NativeImage } from "@/lib/commerce/types";
+import type { NativeImage, NativeOption, NativeVariant } from "@/lib/commerce/types";
 import type { OrderStatus } from "@/lib/commerce/types";
 
 export type AdminActionState = { ok?: boolean; error?: string };
@@ -53,9 +53,74 @@ const productSchema = z.object({
   productType: z.string().optional(),
   tags: z.string().optional(),
   images: z.string().optional(),
+  optionsJson: z.string().optional(),
   available: z.boolean().optional(),
   featured: z.boolean().optional(),
 });
+
+/** Every combination of one value per option group — the product's variants. */
+function cartesian(groups: { name: string; values: string[] }[]): Record<string, string>[] {
+  return groups.reduce<Record<string, string>[]>(
+    (combos, group) =>
+      combos.length === 0
+        ? group.values.map((v) => ({ [group.name]: v }))
+        : combos.flatMap((combo) =>
+            group.values.map((v) => ({ ...combo, [group.name]: v })),
+          ),
+    [],
+  );
+}
+
+/**
+ * Build options/variants from the admin form's option editor (name + comma
+ * separated values per row, e.g. "Taille": "L, XL, XXL"). Every variant
+ * shares the product's own price/stock — there is no per-variant pricing UI
+ * yet — so a size/colour picker just needs the combination, not its own
+ * price. Returns null when the editor is empty, so the caller falls back to
+ * whatever options the product already had.
+ */
+function buildOptionsFromForm(
+  optionsJson: string | undefined,
+  productId: string,
+  price: number,
+  compareAtPrice: number | null,
+  available: boolean,
+): { options: NativeOption[]; variants: NativeVariant[] } | null {
+  if (!optionsJson) return null;
+  let raw: unknown;
+  try {
+    raw = JSON.parse(optionsJson);
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(raw)) return null;
+
+  const groups = raw
+    .map((g) => ({
+      name: typeof g?.name === "string" ? g.name.trim() : "",
+      values: Array.isArray(g?.values)
+        ? g.values.map((v: unknown) => String(v).trim()).filter(Boolean)
+        : [],
+    }))
+    .filter((g) => g.name && g.values.length > 0);
+
+  if (groups.length === 0) return null;
+
+  const options: NativeOption[] = groups.map((g) => ({
+    name: g.name,
+    values: g.values,
+  }));
+  const variants: NativeVariant[] = cartesian(groups).map((combo) => ({
+    id: `${productId}-${slugify(Object.values(combo).join("-"))}`,
+    title: Object.values(combo).join(" / "),
+    price,
+    compareAtPrice,
+    options: combo,
+    available,
+  }));
+
+  return { options, variants };
+}
 
 /** Create or update a product from the admin form. */
 export async function saveProductAction(
@@ -76,6 +141,7 @@ export async function saveProductAction(
     productType: formData.get("productType") || "",
     tags: formData.get("tags") || "",
     images: formData.get("images") || "",
+    optionsJson: formData.get("optionsJson") || undefined,
     available: formData.get("available") === "on",
     featured: formData.get("featured") === "on",
   });
@@ -99,22 +165,30 @@ export async function saveProductAction(
     .map((s) => s.trim())
     .filter(Boolean);
 
-  // The admin form has no size/option editor yet — preserve whatever
-  // options the product already has (e.g. shoe sizes) instead of wiping
-  // them out on every unrelated edit. The form's price/stock fields are
-  // the single source of truth for every variant, though: the storefront
-  // reads price and availability off each variant, not the top-level
-  // product row, so a variant left with its old price would silently
-  // keep showing 0 FCFA even after the admin form says otherwise.
+  // The storefront reads price/availability off each variant, not the
+  // top-level product row, so whichever options apply — freshly submitted
+  // from the editor, or already on the product — get the form's price/stock
+  // synced onto every variant. Otherwise a variant would silently keep
+  // showing 0 FCFA / épuisé even after the admin form says otherwise.
   const existing = d.id ? await getNativeProductById(d.id) : null;
   const compareAtPrice =
     d.compareAtPrice && d.compareAtPrice > 0 ? d.compareAtPrice : null;
-  const variants = (existing?.variants ?? []).map((v) => ({
-    ...v,
-    price: d.price,
+  const fromEditor = buildOptionsFromForm(
+    d.optionsJson,
+    id,
+    d.price,
     compareAtPrice,
-    available: d.available ?? true,
-  }));
+    d.available ?? true,
+  );
+  const options = fromEditor?.options ?? existing?.options ?? [];
+  const variants =
+    fromEditor?.variants ??
+    (existing?.variants ?? []).map((v) => ({
+      ...v,
+      price: d.price,
+      compareAtPrice,
+      available: d.available ?? true,
+    }));
 
   try {
     const saved = await upsertProduct({
@@ -130,7 +204,7 @@ export async function saveProductAction(
       productType: d.productType ?? "",
       tags,
       images,
-      options: existing?.options ?? [],
+      options,
       variants,
       available: d.available ?? true,
       featured: d.featured ?? false,
