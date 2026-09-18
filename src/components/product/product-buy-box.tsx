@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Check, Heart, Minus, Plus, Scale, Share2, Truck } from "lucide-react";
 import type { Product, ProductVariant } from "@/lib/shopify/types";
-import { cn, discountPercent, formatPrice } from "@/lib/utils";
-import { FREE_DELIVERY_ABOVE } from "@/lib/commerce/shipping";
+import { cn, discountPercent } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Price } from "@/components/ui/price";
@@ -279,7 +278,7 @@ export function ProductBuyBox({ product }: { product: Product }) {
         className="flex items-center gap-2 rounded-2xl border border-[hsl(var(--border))] p-4 text-sm text-[hsl(var(--muted-foreground))]"
       >
         <Truck className="h-5 w-5 shrink-0" />
-        Paiement à la livraison · Livraison offerte dès {formatPrice(FREE_DELIVERY_ABOVE)}
+        Paiement à la livraison · Livraison offerte
       </motion.div>
     </div>
   );

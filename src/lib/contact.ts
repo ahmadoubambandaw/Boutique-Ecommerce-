@@ -19,8 +19,8 @@ export const CONTACT = {
   phoneTel: PHONES[0].tel,
   /** All numbers joined for prose, e.g. "contactez-nous au {CONTACT.phonesJoined}". */
   phonesJoined: PHONES.map((p) => p.display).join(" / "),
-  whatsapp: "+221 76 262 63 14",
-  whatsappNumber: "221762626314", // wa.me format
+  whatsapp: "+221 78 45 75 354",
+  whatsappNumber: "221784575354", // wa.me format
   email: "commerciale.gsec@gmail.com",
   address: "Zac Mbao, Dakar, Sénégal",
   city: "Dakar",

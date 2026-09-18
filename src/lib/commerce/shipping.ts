@@ -3,7 +3,7 @@
  * module (not a "use server" file) so the constants can be imported by client
  * components too.
  */
-export const DELIVERY_FEE = 1000;
+export const DELIVERY_FEE = 0;
 export const FREE_DELIVERY_ABOVE = 100000;
 
 /** Delivery fee for a given subtotal. */
