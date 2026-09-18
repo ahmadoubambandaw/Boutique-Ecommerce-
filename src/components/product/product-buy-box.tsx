@@ -278,7 +278,7 @@ export function ProductBuyBox({ product }: { product: Product }) {
         className="flex items-center gap-2 rounded-2xl border border-[hsl(var(--border))] p-4 text-sm text-[hsl(var(--muted-foreground))]"
       >
         <Truck className="h-5 w-5 shrink-0" />
-        Paiement à la livraison · Livraison offerte
+        Paiement à la livraison · Livraison offerte sous 100 000 FCFA
       </motion.div>
     </div>
   );

@@ -11,6 +11,7 @@ import { useCart } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/utils";
 import { Price } from "@/components/ui/price";
 import { Button } from "@/components/ui/button";
+import { deliveryNeedsQuote } from "@/lib/commerce/shipping";
 
 export function CartDrawer() {
   const router = useRouter();
@@ -21,6 +22,7 @@ export function CartDrawer() {
     0,
   );
   const currency = lines[0]?.currencyCode ?? "XOF";
+  const needsQuote = deliveryNeedsQuote(subtotal);
 
   function checkout() {
     setOpen(false);
@@ -80,10 +82,14 @@ export function CartDrawer() {
               </div>
             ) : (
               <>
-                {/* Free shipping */}
+                {/* Delivery status */}
                 <div className="border-b border-[hsl(var(--border))] px-5 py-4">
                   <p className="text-sm">
-                    <strong>Livraison offerte 🚚</strong>
+                    {needsQuote ? (
+                      <strong>Frais de livraison à confirmer avec vous 📞</strong>
+                    ) : (
+                      <strong>Livraison offerte 🚚</strong>
+                    )}
                   </p>
                 </div>
 
@@ -170,8 +176,10 @@ export function CartDrawer() {
                     <Price amount={subtotal} baseCurrency={currency} className="tabular-nums" />
                   </div>
                   <p className="mb-4 text-xs text-[hsl(var(--muted-foreground))]">
-                    Livraison gratuite — paiement à la livraison ou par mobile
-                    money.
+                    {needsQuote
+                      ? "Frais de livraison à confirmer avec vous — "
+                      : "Livraison gratuite — "}
+                    paiement à la livraison ou par mobile money.
                   </p>
                   <Button className="w-full" size="lg" onClick={checkout}>
                     Passer au paiement

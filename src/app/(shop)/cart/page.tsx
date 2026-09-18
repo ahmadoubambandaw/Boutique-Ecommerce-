@@ -9,7 +9,7 @@ import { useCart } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DELIVERY_FEE, FREE_DELIVERY_ABOVE } from "@/lib/commerce/shipping";
+import { deliveryNeedsQuote } from "@/lib/commerce/shipping";
 
 export default function CartPage() {
   const router = useRouter();
@@ -21,8 +21,8 @@ export default function CartPage() {
     0,
   );
   const currency = lines[0]?.currencyCode ?? "XOF";
-  const shipping =
-    subtotal >= FREE_DELIVERY_ABOVE || subtotal === 0 ? 0 : DELIVERY_FEE;
+  const needsQuote = deliveryNeedsQuote(subtotal);
+  const shipping = 0;
 
   function checkout() {
     router.push("/checkout");
@@ -134,7 +134,7 @@ export default function CartPage() {
             <div className="flex justify-between">
               <dt className="text-[hsl(var(--muted-foreground))]">Livraison</dt>
               <dd className="tabular-nums">
-                {shipping === 0 ? "Offerte" : formatPrice(shipping, currency)}
+                {needsQuote ? "À confirmer" : "Offerte"}
               </dd>
             </div>
             <div className="flex justify-between border-t border-[hsl(var(--border))] pt-2 text-base font-semibold">
@@ -144,6 +144,12 @@ export default function CartPage() {
               </dd>
             </div>
           </dl>
+          {needsQuote && (
+            <p className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">
+              Au-delà de 100 000 FCFA, les frais de livraison sont confirmés
+              directement avec vous après la commande.
+            </p>
+          )}
           <p className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">
             Paiement à la livraison ou par mobile money (Wave / Orange Money).
           </p>
