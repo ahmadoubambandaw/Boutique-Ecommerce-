@@ -103,6 +103,11 @@ export const resolveTenant = cache(async (): Promise<Tenant> => {
       storeName: s.storeName ?? base.branding.storeName,
       tagline: s.tagline ?? base.branding.tagline,
     };
+    base.integrations = {
+      ...base.integrations,
+      metaPixelId: s.metaPixelId ?? base.integrations.metaPixelId,
+      googleAnalyticsId: s.googleAnalyticsId ?? base.integrations.googleAnalyticsId,
+    };
     if (s.bannerMessage) {
       base.banners = [
         { id: "primary", message: s.bannerMessage, href: "/products", active: s.bannerActive },

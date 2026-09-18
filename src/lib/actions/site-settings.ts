@@ -40,6 +40,8 @@ export async function saveBrandSettingsAction(
       tagline: clean(formData.get("tagline")),
       bannerMessage: clean(formData.get("bannerMessage")),
       bannerActive: formData.get("bannerActive") === "on",
+      metaPixelId: clean(formData.get("metaPixelId")),
+      googleAnalyticsId: clean(formData.get("googleAnalyticsId")),
     });
     // Reflect the new colours/name/banner across storefront + admin immediately.
     revalidatePath("/", "layout");

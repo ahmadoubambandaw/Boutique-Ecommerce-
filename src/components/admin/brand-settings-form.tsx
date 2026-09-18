@@ -4,7 +4,7 @@ import * as React from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { motion } from "framer-motion";
-import { Check, Palette } from "lucide-react";
+import { Check, Megaphone, Palette } from "lucide-react";
 import {
   saveBrandSettingsAction,
   type BrandSettingsState,
@@ -37,12 +37,16 @@ export function BrandSettingsForm({
   accent,
   bannerMessage,
   bannerActive,
+  metaPixelId,
+  googleAnalyticsId,
 }: {
   storeName: string;
   tagline: string;
   accent: string;
   bannerMessage: string;
   bannerActive: boolean;
+  metaPixelId: string;
+  googleAnalyticsId: string;
 }) {
   const [state, action] = useActionState<BrandSettingsState, FormData>(
     saveBrandSettingsAction,
@@ -154,6 +158,40 @@ export function BrandSettingsForm({
           />
           Afficher la bannière en haut du site
         </label>
+      </section>
+
+      {/* Ad tracking */}
+      <section className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Megaphone className="h-4 w-4 text-[hsl(var(--accent))]" />
+          <h3 className="font-semibold">Suivi & publicité</h3>
+        </div>
+        <p className="text-xs text-[hsl(var(--muted-foreground))]">
+          Renseignez ces identifiants pour suivre les ventes venant de vos
+          campagnes Facebook/Instagram et Google.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">
+              Meta Pixel ID
+            </label>
+            <Input
+              name="metaPixelId"
+              defaultValue={metaPixelId}
+              placeholder="Ex. 1234567890123456"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">
+              Google Analytics ID
+            </label>
+            <Input
+              name="googleAnalyticsId"
+              defaultValue={googleAnalyticsId}
+              placeholder="Ex. G-XXXXXXXXXX"
+            />
+          </div>
+        </div>
       </section>
 
       {state.error && (
