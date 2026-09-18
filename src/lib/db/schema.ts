@@ -218,6 +218,8 @@ export const siteSettings = pgTable("site_settings", {
   tagline: text("tagline"),
   bannerMessage: text("banner_message"),
   bannerActive: boolean("banner_active").notNull().default(true),
+  metaPixelId: text("meta_pixel_id"),
+  googleAnalyticsId: text("google_analytics_id"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

@@ -10,6 +10,8 @@ export type SiteSettings = {
   tagline: string | null;
   bannerMessage: string | null;
   bannerActive: boolean;
+  metaPixelId: string | null;
+  googleAnalyticsId: string | null;
 };
 
 const ID = "default";
@@ -22,6 +24,8 @@ function rowToSettings(r: SiteSettingsRow): SiteSettings {
     tagline: r.tagline,
     bannerMessage: r.bannerMessage,
     bannerActive: r.bannerActive,
+    metaPixelId: r.metaPixelId,
+    googleAnalyticsId: r.googleAnalyticsId,
   };
 }
 
@@ -51,6 +55,8 @@ export async function saveSiteSettings(
     tagline: input.tagline ?? null,
     bannerMessage: input.bannerMessage ?? null,
     bannerActive: input.bannerActive ?? true,
+    metaPixelId: input.metaPixelId ?? null,
+    googleAnalyticsId: input.googleAnalyticsId ?? null,
     updatedAt: new Date(),
   };
   await db

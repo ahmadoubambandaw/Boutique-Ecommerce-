@@ -54,6 +54,10 @@ export default async function AdminSettingsPage() {
                 settings?.bannerMessage ?? tenant.banners[0]?.message ?? ""
               }
               bannerActive={settings?.bannerActive ?? true}
+              metaPixelId={settings?.metaPixelId ?? tenant.integrations.metaPixelId ?? ""}
+              googleAnalyticsId={
+                settings?.googleAnalyticsId ?? tenant.integrations.googleAnalyticsId ?? ""
+              }
             />
           ) : (
             <p className="rounded-xl bg-amber-500/10 px-3 py-2 text-sm">

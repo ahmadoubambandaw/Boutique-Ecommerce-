@@ -10,7 +10,7 @@ import { formatPrice, cn } from "@/lib/utils";
 import { Input, Textarea } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { placeOrderAction } from "@/lib/actions/order";
-import { DELIVERY_FEE, FREE_DELIVERY_ABOVE } from "@/lib/commerce/shipping";
+import { deliveryNeedsQuote } from "@/lib/commerce/shipping";
 import { MOBILE_MONEY_NUMBER } from "@/lib/contact";
 import type { PaymentMethod } from "@/lib/commerce/types";
 
@@ -25,7 +25,8 @@ export default function CheckoutPage() {
     (n, l) => n + parseFloat(l.price) * l.quantity,
     0,
   );
-  const deliveryFee = subtotal >= FREE_DELIVERY_ABOVE ? 0 : DELIVERY_FEE;
+  const deliveryFee = 0;
+  const needsQuote = deliveryNeedsQuote(subtotal);
   const total = subtotal + deliveryFee;
   const currency = lines[0]?.currencyCode ?? "XOF";
 
@@ -194,7 +195,7 @@ export default function CheckoutPage() {
                 <Truck className="h-4 w-4" /> Livraison
               </dt>
               <dd className="tabular-nums">
-                {deliveryFee === 0 ? "Offerte" : formatPrice(deliveryFee, currency)}
+                {needsQuote ? "À confirmer" : "Offerte"}
               </dd>
             </div>
             <div className="flex justify-between border-t border-[hsl(var(--border))] pt-2 text-base font-semibold">
@@ -202,6 +203,12 @@ export default function CheckoutPage() {
               <dd className="tabular-nums">{formatPrice(total, currency)}</dd>
             </div>
           </dl>
+          {needsQuote && (
+            <p className="text-xs text-[hsl(var(--muted-foreground))]">
+              Au-delà de 100 000 FCFA, les frais de livraison sont confirmés
+              directement avec vous après la commande.
+            </p>
+          )}
 
           {error && (
             <p className="mt-3 rounded-xl bg-red-500/10 px-3 py-2 text-xs text-red-500">
