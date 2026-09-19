@@ -7,6 +7,7 @@ import { resolveTenant } from "@/lib/tenant/registry";
 import { Hero } from "@/components/home/hero";
 import { FeaturedSlider } from "@/components/home/featured-slider";
 import { Features } from "@/components/home/features";
+import { EditorialBanner } from "@/components/home/editorial-banner";
 import { ProductGrid } from "@/components/product/product-grid";
 import { CollectionCard } from "@/components/collection/collection-card";
 import { SectionHeader } from "@/components/ui/section-header";
@@ -83,18 +84,14 @@ export default async function HomePage() {
 
       {/* Editorial band */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-3xl bg-[hsl(var(--accent))] px-8 py-20 text-center text-[hsl(var(--accent-foreground))] sm:py-28">
-          <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-5xl">
-            Protéger. Prévenir.
-            <br />
-            Sécuriser.
-          </h2>
-          <p className="mx-auto mt-4 max-w-lg text-balance opacity-80">
-            Des équipements certifiés, conformes aux normes, et un
-            accompagnement expert pour la sécurité de vos équipes et de vos
-            locaux.
-          </p>
-        </div>
+        <EditorialBanner
+          images={[
+            "https://cdktjngwukkeededkvji.supabase.co/storage/v1/object/public/product-images/gse-upload/harnais-de-securite-antichute-rouge-noir.png",
+            "https://cdktjngwukkeededkvji.supabase.co/storage/v1/object/public/product-images/93c47bad-1482-4aca-881b-87d0c4dd293a.png",
+            "https://cdktjngwukkeededkvji.supabase.co/storage/v1/object/public/product-images/15c00127-100f-4fda-b587-b9d82229915c.jpg",
+            "https://cdktjngwukkeededkvji.supabase.co/storage/v1/object/public/product-images/afb8e4fa-fa99-468f-97dd-2d92b6147115.jpg",
+          ]}
+        />
       </section>
 
       <RecentlyViewed />
