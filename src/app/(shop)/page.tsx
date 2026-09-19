@@ -86,10 +86,10 @@ export default async function HomePage() {
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <EditorialBanner
           images={[
-            "https://cdktjngwukkeededkvji.supabase.co/storage/v1/object/public/product-images/gse-upload/harnais-de-securite-antichute-rouge-noir.png",
-            "https://cdktjngwukkeededkvji.supabase.co/storage/v1/object/public/product-images/93c47bad-1482-4aca-881b-87d0c4dd293a.png",
-            "https://cdktjngwukkeededkvji.supabase.co/storage/v1/object/public/product-images/15c00127-100f-4fda-b587-b9d82229915c.jpg",
-            "https://cdktjngwukkeededkvji.supabase.co/storage/v1/object/public/product-images/afb8e4fa-fa99-468f-97dd-2d92b6147115.jpg",
+            "/editorial/refinery-construction.jpg",
+            "/editorial/underground-mine.jpg",
+            "/editorial/steel-factory.jpg",
+            "/editorial/construction-site.jpg",
           ]}
         />
       </section>

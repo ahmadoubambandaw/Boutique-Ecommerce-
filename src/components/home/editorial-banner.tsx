@@ -3,7 +3,6 @@
 import * as React from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { supplierImageLoader } from "@/lib/supplier-image-loader";
 
 const SLIDE_DURATION = 5000;
 
@@ -33,7 +32,6 @@ export function EditorialBanner({ images }: { images: string[] }) {
               transition={{ duration: 1 }}
             >
               <Image
-                loader={supplierImageLoader}
                 src={images[active]!}
                 alt=""
                 fill
