@@ -6,16 +6,18 @@ import { z } from "zod";
 import { getAdminSession } from "@/lib/auth/admin-actions";
 import { isDbConfigured } from "@/lib/db/client";
 import {
+  countNewQuoteRequests,
   countPendingOrders,
   deleteProduct,
   getNativeProductById,
   updateOrderStatus,
+  updateQuoteRequestStatus,
   upsertProduct,
 } from "@/lib/commerce/repository";
 import { captureError } from "@/lib/monitoring";
 import { isUploadConfigured, uploadImage } from "@/lib/storage";
 import type { NativeImage, NativeOption, NativeVariant } from "@/lib/commerce/types";
-import type { OrderStatus } from "@/lib/commerce/types";
+import type { OrderStatus, QuoteRequestStatus } from "@/lib/commerce/types";
 
 export type AdminActionState = { ok?: boolean; error?: string };
 
@@ -303,6 +305,35 @@ export async function setOrderStatusAction(
     return { ok: true };
   } catch (err) {
     captureError(err, { stage: "set-order-status" });
+    return { error: "Mise à jour impossible." };
+  }
+}
+
+/** Number of quote requests awaiting a first contact (for the admin nav badge). */
+export async function pendingQuoteRequestsCountAction(): Promise<number> {
+  const session = await getAdminSession();
+  if (!session && isDbConfigured()) return 0;
+  return countNewQuoteRequests();
+}
+
+const QUOTE_STATUSES: QuoteRequestStatus[] = ["new", "contacted", "closed"];
+
+/** Update a quote request's follow-up status. */
+export async function setQuoteRequestStatusAction(
+  id: string,
+  status: string,
+): Promise<AdminActionState> {
+  const guard = await requireAdmin();
+  if (guard) return guard;
+  if (!QUOTE_STATUSES.includes(status as QuoteRequestStatus)) {
+    return { error: "Statut invalide." };
+  }
+  try {
+    await updateQuoteRequestStatus(id, status as QuoteRequestStatus);
+    revalidatePath("/admin/devis");
+    return { ok: true };
+  } catch (err) {
+    captureError(err, { stage: "set-quote-status" });
     return { error: "Mise à jour impossible." };
   }
 }

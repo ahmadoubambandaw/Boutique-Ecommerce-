@@ -1,7 +1,7 @@
 import "server-only";
 import { captureError, captureMessage } from "@/lib/monitoring";
 import { formatPrice } from "@/lib/utils";
-import type { Order } from "@/lib/commerce/types";
+import type { Order, QuoteRequest } from "@/lib/commerce/types";
 
 /**
  * Merchant notifications for new orders.
@@ -118,5 +118,64 @@ export async function notifyNewOrder(order: Order): Promise<void> {
     }
   } catch (err) {
     captureError(err, { stage: "notify-order" });
+  }
+}
+
+function quoteHtml(quote: QuoteRequest): string {
+  return `
+  <div style="font-family:system-ui,Arial,sans-serif;max-width:560px;margin:auto;color:#111">
+    <h2 style="margin:0 0 4px">📋 Nouvelle demande de devis</h2>
+    <p style="color:#666;margin:0 0 16px">${quote.companyName}</p>
+
+    <p style="margin:0;font-size:14px;line-height:1.6">
+      <strong>Entreprise :</strong> ${quote.companyName}${quote.ninea ? `<br/><strong>NINEA/ICE :</strong> ${quote.ninea}` : ""}<br/>
+      <strong>Contact :</strong> ${quote.contactName}<br/>
+      📞 ${quote.phone}${quote.email ? `<br/>✉️ ${quote.email}` : ""}
+    </p>
+
+    ${
+      quote.message
+        ? `<h3 style="margin:20px 0 6px">Besoin exprimé</h3>
+    <p style="margin:0;font-size:14px;line-height:1.5;white-space:pre-wrap">${quote.message}</p>`
+        : ""
+    }
+  </div>`;
+}
+
+/** Notify the merchant of a new quote request. Never throws — failures are logged. */
+export async function notifyNewQuoteRequest(quote: QuoteRequest): Promise<void> {
+  const to = merchantEmail();
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (!apiKey || !to) {
+    captureMessage("new quote request (email not configured)", {
+      companyName: quote.companyName,
+    });
+    return;
+  }
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: process.env.ORDER_FROM_EMAIL || "Boutique <onboarding@resend.dev>",
+        to: [to],
+        subject: `📋 Demande de devis — ${quote.companyName}`,
+        html: quoteHtml(quote),
+        reply_to: quote.email || undefined,
+      }),
+    });
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      captureError(new Error(`resend ${res.status}: ${detail.slice(0, 200)}`), {
+        stage: "notify-quote",
+      });
+    }
+  } catch (err) {
+    captureError(err, { stage: "notify-quote" });
   }
 }

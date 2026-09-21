@@ -60,6 +60,20 @@ export type OrderStatus =
 
 export type PaymentMethod = "cod" | "mobile_money";
 
+export type QuoteRequestStatus = "new" | "contacted" | "closed";
+
+export type QuoteRequest = {
+  id: string;
+  companyName: string;
+  ninea: string | null;
+  contactName: string;
+  phone: string;
+  email: string | null;
+  message: string;
+  status: QuoteRequestStatus;
+  createdAt: string;
+};
+
 export type OrderItem = {
   productId: string;
   handle: string;

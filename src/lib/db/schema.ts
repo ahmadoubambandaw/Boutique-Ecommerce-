@@ -28,6 +28,7 @@ import type {
   OrderItem,
   OrderStatus,
   PaymentMethod,
+  QuoteRequestStatus,
 } from "@/lib/commerce/types";
 
 /**
@@ -200,10 +201,36 @@ export const orders = pgTable(
   }),
 );
 
+/**
+ * B2B quote requests ("Demander un devis") — large accounts procure by
+ * purchase order/invoice, not cash-on-delivery checkout, so this is a
+ * separate lightweight lead form rather than an `orders` row.
+ */
+export const quoteRequests = pgTable(
+  "quote_requests",
+  {
+    id: text("id").primaryKey(),
+    tenantId: text("tenant_id").notNull().default("default"),
+    companyName: text("company_name").notNull(),
+    ninea: text("ninea"),
+    contactName: text("contact_name").notNull(),
+    phone: text("phone").notNull(),
+    email: text("email"),
+    message: text("message").notNull().default(""),
+    status: text("status").$type<QuoteRequestStatus>().notNull().default("new"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    tenantIdx: index("quote_requests_tenant_idx").on(t.tenantId),
+    createdIdx: index("quote_requests_created_idx").on(t.createdAt),
+  }),
+);
+
 export type ProductRow = typeof products.$inferSelect;
 export type NewProductRow = typeof products.$inferInsert;
 export type CollectionRow = typeof collections.$inferSelect;
 export type OrderRow = typeof orders.$inferSelect;
+export type QuoteRequestRow = typeof quoteRequests.$inferSelect;
 
 /**
  * Single-row store settings the merchant edits from the admin (accent colour,
