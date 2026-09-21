@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Building2,
+  FileText,
   LayoutDashboard,
   LogOut,
   Package,
@@ -15,7 +16,7 @@ import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
 import { OrdersWatcher } from "@/components/admin/orders-watcher";
 import { getAdminSession, adminLogoutAction } from "@/lib/auth/admin-actions";
 import { isDbConfigured } from "@/lib/db/client";
-import { countPendingOrders } from "@/lib/commerce/repository";
+import { countNewQuoteRequests, countPendingOrders } from "@/lib/commerce/repository";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -26,6 +27,7 @@ const NAV = [
   { label: "Vue d'ensemble", href: "/admin", icon: LayoutDashboard, superOnly: false },
   { label: "Produits", href: "/admin/products", icon: Package, superOnly: false },
   { label: "Commandes", href: "/admin/orders", icon: ShoppingCart, superOnly: false },
+  { label: "Devis", href: "/admin/devis", icon: FileText, superOnly: false },
   { label: "Abonnés", href: "/admin/subscribers", icon: Mail, superOnly: false },
   { label: "Super Admin", href: "/admin/super", icon: Building2, superOnly: true },
   { label: "Mon compte", href: "/admin/account", icon: UserCog, superOnly: false },
@@ -44,6 +46,7 @@ export default async function AdminLayout({
   const isSuper = session ? session.role === "super_admin" : !isDbConfigured();
   const nav = NAV.filter((item) => !item.superOnly || isSuper);
   const pendingCount = await countPendingOrders();
+  const pendingQuoteCount = await countNewQuoteRequests();
 
   return (
     <div className="flex min-h-screen">
@@ -63,6 +66,11 @@ export default async function AdminLayout({
               {item.href === "/admin/orders" && pendingCount > 0 && (
                 <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[hsl(var(--brand-red))] px-1.5 text-xs font-semibold text-white">
                   {pendingCount}
+                </span>
+              )}
+              {item.href === "/admin/devis" && pendingQuoteCount > 0 && (
+                <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[hsl(var(--brand-red))] px-1.5 text-xs font-semibold text-white">
+                  {pendingQuoteCount}
                 </span>
               )}
             </Link>
@@ -90,6 +98,7 @@ export default async function AdminLayout({
               isSuper={isSuper}
               hasSession={Boolean(session)}
               pendingCount={pendingCount}
+              pendingQuoteCount={pendingQuoteCount}
             />
             <span className="truncate text-sm text-[hsl(var(--muted-foreground))]">
               {session

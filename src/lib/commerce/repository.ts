@@ -5,10 +5,12 @@ import {
   collections,
   orders,
   products,
+  quoteRequests,
   type CollectionRow,
   type NewProductRow,
   type OrderRow,
   type ProductRow,
+  type QuoteRequestRow,
 } from "@/lib/db/schema";
 import type {
   NativeCollection,
@@ -18,6 +20,8 @@ import type {
   OrderItem,
   OrderStatus,
   PaymentMethod,
+  QuoteRequest,
+  QuoteRequestStatus,
 } from "./types";
 
 const TENANT = "default";
@@ -68,6 +72,20 @@ function rowToOrder(r: OrderRow): Order {
     total: Number(r.total),
     currency: r.currency,
     paymentMethod: r.paymentMethod,
+    status: r.status,
+    createdAt: r.createdAt.toISOString(),
+  };
+}
+
+function rowToQuoteRequest(r: QuoteRequestRow): QuoteRequest {
+  return {
+    id: r.id,
+    companyName: r.companyName,
+    ninea: r.ninea,
+    contactName: r.contactName,
+    phone: r.phone,
+    email: r.email,
+    message: r.message,
     status: r.status,
     createdAt: r.createdAt.toISOString(),
   };
@@ -280,4 +298,54 @@ export async function updateOrderStatus(
   const db = getDb();
   if (!db) return;
   await db.update(orders).set({ status }).where(eq(orders.id, id));
+}
+
+/* ── Quote requests (B2B "Demander un devis") ────────────────── */
+
+export async function createQuoteRequest(input: {
+  id: string;
+  companyName: string;
+  ninea: string | null;
+  contactName: string;
+  phone: string;
+  email: string | null;
+  message: string;
+}): Promise<QuoteRequest | null> {
+  const db = getDb();
+  if (!db) return null;
+  const [row] = await db
+    .insert(quoteRequests)
+    .values({ ...input, tenantId: TENANT, status: "new" })
+    .returning();
+  return row ? rowToQuoteRequest(row) : null;
+}
+
+export async function listQuoteRequests(): Promise<QuoteRequest[]> {
+  const db = getDb();
+  if (!db) return [];
+  const rows = await db
+    .select()
+    .from(quoteRequests)
+    .where(eq(quoteRequests.tenantId, TENANT))
+    .orderBy(desc(quoteRequests.createdAt));
+  return rows.map(rowToQuoteRequest);
+}
+
+export async function countNewQuoteRequests(): Promise<number> {
+  const db = getDb();
+  if (!db) return 0;
+  const rows = await db
+    .select({ id: quoteRequests.id })
+    .from(quoteRequests)
+    .where(and(eq(quoteRequests.tenantId, TENANT), eq(quoteRequests.status, "new")));
+  return rows.length;
+}
+
+export async function updateQuoteRequestStatus(
+  id: string,
+  status: QuoteRequestStatus,
+): Promise<void> {
+  const db = getDb();
+  if (!db) return;
+  await db.update(quoteRequests).set({ status }).where(eq(quoteRequests.id, id));
 }
