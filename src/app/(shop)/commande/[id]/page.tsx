@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CheckCircle2, Package, Phone, Smartphone, Truck } from "lucide-react";
+import { CheckCircle2, Download, Package, Phone, Smartphone, Truck } from "lucide-react";
 import { getOrder } from "@/lib/commerce/repository";
 import { formatPrice } from "@/lib/utils";
 import { CONTACT, MOBILE_MONEY_NUMBER } from "@/lib/contact";
@@ -88,6 +88,16 @@ export default async function OrderConfirmationPage({
       <p className="mt-2 text-center text-xs text-[hsl(var(--muted-foreground))]">
         Recommandé — pour une confirmation et un traitement plus rapides.
       </p>
+
+      <a
+        href={`/api/proforma/order/${order.id}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-3 flex items-center justify-center gap-2 rounded-2xl border border-[hsl(var(--border))] px-6 py-3 text-center text-sm font-medium hover:bg-[hsl(var(--muted))]"
+      >
+        <Download className="h-4 w-4" />
+        Télécharger la facture proforma (PDF)
+      </a>
 
       {/* Payment instructions */}
       <div className="mt-8 rounded-2xl border border-[hsl(var(--border))] p-5">

@@ -211,12 +211,14 @@ export const quoteRequests = pgTable(
   {
     id: text("id").primaryKey(),
     tenantId: text("tenant_id").notNull().default("default"),
+    quoteNumber: serial("quote_number").notNull(),
     companyName: text("company_name").notNull(),
     ninea: text("ninea"),
     contactName: text("contact_name").notNull(),
     phone: text("phone").notNull(),
     email: text("email"),
     message: text("message").notNull().default(""),
+    items: jsonb("items").$type<OrderItem[]>().notNull().default([]),
     status: text("status").$type<QuoteRequestStatus>().notNull().default("new"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -247,6 +249,13 @@ export const siteSettings = pgTable("site_settings", {
   bannerActive: boolean("banner_active").notNull().default(true),
   metaPixelId: text("meta_pixel_id"),
   googleAnalyticsId: text("google_analytics_id"),
+  invoicePhone: text("invoice_phone"),
+  invoiceWhatsapp: text("invoice_whatsapp"),
+  invoiceEmail: text("invoice_email"),
+  invoiceAddress: text("invoice_address"),
+  bankAccountNumber: text("bank_account_number"),
+  bankRib: text("bank_rib"),
+  bankCode: text("bank_code"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

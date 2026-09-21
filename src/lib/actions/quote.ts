@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createQuoteRequest } from "@/lib/commerce/repository";
 import { captureError } from "@/lib/monitoring";
 import { notifyNewQuoteRequest } from "@/lib/notify";
+import type { OrderItem } from "@/lib/commerce/types";
 
 const quoteSchema = z.object({
   companyName: z.string().min(1, "Nom de l'entreprise requis"),
@@ -26,14 +27,17 @@ export type SubmitQuoteState = {
  * purchase order/invoice, not cash-on-delivery checkout, so this is a
  * lightweight lead form rather than a cart checkout.
  */
-export async function submitQuoteRequestAction(form: {
-  companyName: string;
-  ninea?: string;
-  contactName: string;
-  phone: string;
-  email?: string;
-  message?: string;
-}): Promise<SubmitQuoteState> {
+export async function submitQuoteRequestAction(
+  form: {
+    companyName: string;
+    ninea?: string;
+    contactName: string;
+    phone: string;
+    email?: string;
+    message?: string;
+  },
+  items: OrderItem[] = [],
+): Promise<SubmitQuoteState> {
   const parsed = quoteSchema.safeParse(form);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Champs invalides." };
@@ -49,6 +53,7 @@ export async function submitQuoteRequestAction(form: {
       phone: d.phone,
       email: d.email || null,
       message: d.message || "",
+      items,
     });
 
     if (!quote) {

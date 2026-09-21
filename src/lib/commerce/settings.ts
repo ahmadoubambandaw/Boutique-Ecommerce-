@@ -12,6 +12,13 @@ export type SiteSettings = {
   bannerActive: boolean;
   metaPixelId: string | null;
   googleAnalyticsId: string | null;
+  invoicePhone: string | null;
+  invoiceWhatsapp: string | null;
+  invoiceEmail: string | null;
+  invoiceAddress: string | null;
+  bankAccountNumber: string | null;
+  bankRib: string | null;
+  bankCode: string | null;
 };
 
 const ID = "default";
@@ -26,6 +33,13 @@ function rowToSettings(r: SiteSettingsRow): SiteSettings {
     bannerActive: r.bannerActive,
     metaPixelId: r.metaPixelId,
     googleAnalyticsId: r.googleAnalyticsId,
+    invoicePhone: r.invoicePhone,
+    invoiceWhatsapp: r.invoiceWhatsapp,
+    invoiceEmail: r.invoiceEmail,
+    invoiceAddress: r.invoiceAddress,
+    bankAccountNumber: r.bankAccountNumber,
+    bankRib: r.bankRib,
+    bankCode: r.bankCode,
   };
 }
 
@@ -57,6 +71,13 @@ export async function saveSiteSettings(
     bannerActive: input.bannerActive ?? true,
     metaPixelId: input.metaPixelId ?? null,
     googleAnalyticsId: input.googleAnalyticsId ?? null,
+    invoicePhone: input.invoicePhone ?? null,
+    invoiceWhatsapp: input.invoiceWhatsapp ?? null,
+    invoiceEmail: input.invoiceEmail ?? null,
+    invoiceAddress: input.invoiceAddress ?? null,
+    bankAccountNumber: input.bankAccountNumber ?? null,
+    bankRib: input.bankRib ?? null,
+    bankCode: input.bankCode ?? null,
     updatedAt: new Date(),
   };
   await db
