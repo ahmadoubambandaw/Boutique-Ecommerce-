@@ -1,3 +1,4 @@
+import { Download } from "lucide-react";
 import { listQuoteRequests } from "@/lib/commerce/repository";
 import { isDbConfigured } from "@/lib/db/client";
 import { QuoteStatusSelect } from "@/components/admin/quote-status-select";
@@ -49,7 +50,9 @@ export default async function AdminDevisPage() {
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold">{q.companyName}</span>
+                    <span className="font-semibold">
+                      Devis n°{q.quoteNumber} · {q.companyName}
+                    </span>
                     <span className="text-sm text-[hsl(var(--muted-foreground))]">
                       {formatDate(q.createdAt)}
                     </span>
@@ -63,13 +66,36 @@ export default async function AdminDevisPage() {
                     {q.contactName} · {q.phone}
                     {q.email ? ` · ${q.email}` : ""}
                   </p>
+                  {q.items.length > 0 && (
+                    <ul className="mt-2 space-y-0.5 text-sm text-[hsl(var(--muted-foreground))]">
+                      {q.items.map((item, i) => (
+                        <li key={`${item.productId}-${i}`}>
+                          {item.title}
+                          {item.variantTitle && item.variantTitle !== "Default Title"
+                            ? ` — ${item.variantTitle}`
+                            : ""}{" "}
+                          × {item.quantity}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   {q.message && (
                     <p className="mt-2 whitespace-pre-wrap text-sm text-[hsl(var(--muted-foreground))]">
                       {q.message}
                     </p>
                   )}
                 </div>
-                <QuoteStatusSelect id={q.id} status={q.status} disabled={readOnly} />
+                <div className="flex flex-col items-end gap-2">
+                  <QuoteStatusSelect id={q.id} status={q.status} disabled={readOnly} />
+                  <a
+                    href={`/api/proforma/quote/${q.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+                  >
+                    <Download className="h-3.5 w-3.5" /> Devis PDF
+                  </a>
+                </div>
               </div>
             </div>
           ))}

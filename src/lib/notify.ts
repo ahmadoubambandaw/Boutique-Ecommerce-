@@ -122,9 +122,22 @@ export async function notifyNewOrder(order: Order): Promise<void> {
 }
 
 function quoteHtml(quote: QuoteRequest): string {
+  const rows = quote.items
+    .map(
+      (i) => `
+      <tr>
+        <td style="padding:6px 0;border-bottom:1px solid #eee">${i.title}${
+          i.variantTitle && i.variantTitle !== "Default Title"
+            ? ` — ${i.variantTitle}`
+            : ""
+        } × ${i.quantity}</td>
+      </tr>`,
+    )
+    .join("");
+
   return `
   <div style="font-family:system-ui,Arial,sans-serif;max-width:560px;margin:auto;color:#111">
-    <h2 style="margin:0 0 4px">📋 Nouvelle demande de devis</h2>
+    <h2 style="margin:0 0 4px">📋 Nouvelle demande de devis n°${quote.quoteNumber}</h2>
     <p style="color:#666;margin:0 0 16px">${quote.companyName}</p>
 
     <p style="margin:0;font-size:14px;line-height:1.6">
@@ -134,8 +147,15 @@ function quoteHtml(quote: QuoteRequest): string {
     </p>
 
     ${
+      rows
+        ? `<h3 style="margin:20px 0 6px">Produits souhaités</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:14px">${rows}</table>`
+        : ""
+    }
+
+    ${
       quote.message
-        ? `<h3 style="margin:20px 0 6px">Besoin exprimé</h3>
+        ? `<h3 style="margin:20px 0 6px">Précisions</h3>
     <p style="margin:0;font-size:14px;line-height:1.5;white-space:pre-wrap">${quote.message}</p>`
         : ""
     }

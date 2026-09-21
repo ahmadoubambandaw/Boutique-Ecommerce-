@@ -64,12 +64,14 @@ export type QuoteRequestStatus = "new" | "contacted" | "closed";
 
 export type QuoteRequest = {
   id: string;
+  quoteNumber: number;
   companyName: string;
   ninea: string | null;
   contactName: string;
   phone: string;
   email: string | null;
   message: string;
+  items: OrderItem[];
   status: QuoteRequestStatus;
   createdAt: string;
 };

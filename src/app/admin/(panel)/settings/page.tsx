@@ -58,6 +58,13 @@ export default async function AdminSettingsPage() {
               googleAnalyticsId={
                 settings?.googleAnalyticsId ?? tenant.integrations.googleAnalyticsId ?? ""
               }
+              invoicePhone={settings?.invoicePhone ?? ""}
+              invoiceWhatsapp={settings?.invoiceWhatsapp ?? ""}
+              invoiceEmail={settings?.invoiceEmail ?? ""}
+              invoiceAddress={settings?.invoiceAddress ?? ""}
+              bankAccountNumber={settings?.bankAccountNumber ?? ""}
+              bankRib={settings?.bankRib ?? ""}
+              bankCode={settings?.bankCode ?? ""}
             />
           ) : (
             <p className="rounded-xl bg-amber-500/10 px-3 py-2 text-sm">

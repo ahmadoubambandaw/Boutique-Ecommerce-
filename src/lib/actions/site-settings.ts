@@ -42,6 +42,13 @@ export async function saveBrandSettingsAction(
       bannerActive: formData.get("bannerActive") === "on",
       metaPixelId: clean(formData.get("metaPixelId")),
       googleAnalyticsId: clean(formData.get("googleAnalyticsId")),
+      invoicePhone: clean(formData.get("invoicePhone")),
+      invoiceWhatsapp: clean(formData.get("invoiceWhatsapp")),
+      invoiceEmail: clean(formData.get("invoiceEmail")),
+      invoiceAddress: clean(formData.get("invoiceAddress")),
+      bankAccountNumber: clean(formData.get("bankAccountNumber")),
+      bankRib: clean(formData.get("bankRib")),
+      bankCode: clean(formData.get("bankCode")),
     });
     // Reflect the new colours/name/banner across storefront + admin immediately.
     revalidatePath("/", "layout");

@@ -1,4 +1,5 @@
 import {
+  getProduct,
   listProducts,
   listFeaturedProducts,
   listCollectionsWithCounts,
@@ -21,11 +22,12 @@ import { appUrl } from "@/lib/seo";
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [tenant, products, featured, collections] = await Promise.all([
+  const [tenant, products, featured, collections, heroProduct] = await Promise.all([
     resolveTenant(),
     listProducts({ first: 8 }),
     listFeaturedProducts(4),
     listCollectionsWithCounts(),
+    getProduct("chaussures-de-securite"),
   ]);
 
   const trending = products.slice(0, 8);
@@ -42,7 +44,7 @@ export default async function HomePage() {
         }}
       />
 
-      <Hero tagline={tenant.branding.tagline ?? ""} />
+      <Hero tagline={tenant.branding.tagline ?? ""} featuredProduct={heroProduct} />
 
       {featured.length > 0 && <FeaturedSlider products={featured} />}
 

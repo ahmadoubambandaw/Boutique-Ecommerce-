@@ -4,7 +4,7 @@ import * as React from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { motion } from "framer-motion";
-import { Check, Megaphone, Palette } from "lucide-react";
+import { Check, FileText, Megaphone, Palette } from "lucide-react";
 import {
   saveBrandSettingsAction,
   type BrandSettingsState,
@@ -39,6 +39,13 @@ export function BrandSettingsForm({
   bannerActive,
   metaPixelId,
   googleAnalyticsId,
+  invoicePhone,
+  invoiceWhatsapp,
+  invoiceEmail,
+  invoiceAddress,
+  bankAccountNumber,
+  bankRib,
+  bankCode,
 }: {
   storeName: string;
   tagline: string;
@@ -47,6 +54,13 @@ export function BrandSettingsForm({
   bannerActive: boolean;
   metaPixelId: string;
   googleAnalyticsId: string;
+  invoicePhone: string;
+  invoiceWhatsapp: string;
+  invoiceEmail: string;
+  invoiceAddress: string;
+  bankAccountNumber: string;
+  bankRib: string;
+  bankCode: string;
 }) {
   const [state, action] = useActionState<BrandSettingsState, FormData>(
     saveBrandSettingsAction,
@@ -190,6 +204,70 @@ export function BrandSettingsForm({
               defaultValue={googleAnalyticsId}
               placeholder="Ex. G-XXXXXXXXXX"
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Invoice / proforma */}
+      <section className="space-y-3">
+        <div className="flex items-center gap-2">
+          <FileText className="h-4 w-4 text-[hsl(var(--accent))]" />
+          <h3 className="font-semibold">Facture proforma</h3>
+        </div>
+        <p className="text-xs text-[hsl(var(--muted-foreground))]">
+          Coordonnées affichées sur les devis et factures proforma téléchargés
+          par vos clients. Laissez vide pour masquer une ligne.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">Téléphone</label>
+            <Input
+              name="invoicePhone"
+              defaultValue={invoicePhone}
+              placeholder="705442602"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">WhatsApp</label>
+            <Input
+              name="invoiceWhatsapp"
+              defaultValue={invoiceWhatsapp}
+              placeholder="221 76 262 63 14"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">E-mail</label>
+            <Input
+              name="invoiceEmail"
+              defaultValue={invoiceEmail}
+              placeholder="commerciale.gse@gmail.com"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">Adresse</label>
+            <Input
+              name="invoiceAddress"
+              defaultValue={invoiceAddress}
+              placeholder="Zac Mbao"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">
+              N° de compte bancaire
+            </label>
+            <Input
+              name="bankAccountNumber"
+              defaultValue={bankAccountNumber}
+              placeholder="001178584001"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">Clé RIB</label>
+            <Input name="bankRib" defaultValue={bankRib} placeholder="87" />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium">Code banque</label>
+            <Input name="bankCode" defaultValue={bankCode} placeholder="SNO48" />
           </div>
         </div>
       </section>

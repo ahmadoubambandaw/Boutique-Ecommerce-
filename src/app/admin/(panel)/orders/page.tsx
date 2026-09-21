@@ -1,4 +1,4 @@
-import { Banknote, Smartphone } from "lucide-react";
+import { Banknote, Download, Smartphone } from "lucide-react";
 import { listOrders } from "@/lib/commerce/repository";
 import { isDbConfigured } from "@/lib/db/client";
 import { formatPrice } from "@/lib/utils";
@@ -93,6 +93,14 @@ export default async function AdminOrdersPage() {
                     status={o.status}
                     disabled={readOnly}
                   />
+                  <a
+                    href={`/api/proforma/order/${o.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+                  >
+                    <Download className="h-3.5 w-3.5" /> Facture proforma
+                  </a>
                 </div>
               </div>
 

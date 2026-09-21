@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Building2, CheckCircle2, PackageSearch } from "lucide-react";
+import { Building2, CheckCircle2, Download, PackageSearch } from "lucide-react";
 import { Input, Textarea } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/store/cart";
@@ -14,7 +14,7 @@ export default function DevisPage() {
   const [selected, setSelected] = React.useState<Record<string, boolean>>({});
   const [pending, setPending] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [done, setDone] = React.useState(false);
+  const [quoteId, setQuoteId] = React.useState<string | null>(null);
 
   // Select every cart item by default the first time the cart is read
   // (client-side store hydrates after mount, so this can't be initial state).
@@ -37,35 +37,37 @@ export default function DevisPage() {
     setPending(true);
     const fd = new FormData(e.currentTarget);
 
-    const productsList = selectedLines
-      .map((l) => `- ${l.title}${l.variantTitle !== "Default Title" ? ` (${l.variantTitle})` : ""} × ${l.quantity}`)
-      .join("\n");
-    const note = String(fd.get("message") ?? "").trim();
-    const message = [
-      productsList && `Produits souhaités :\n${productsList}`,
-      note,
-    ]
-      .filter(Boolean)
-      .join("\n\n");
+    const items = selectedLines.map((l) => ({
+      productId: l.handle,
+      handle: l.handle,
+      title: l.title,
+      variantTitle: l.variantTitle,
+      price: parseFloat(l.price),
+      quantity: l.quantity,
+      image: l.image,
+    }));
 
-    const res = await submitQuoteRequestAction({
-      companyName: String(fd.get("companyName") ?? ""),
-      ninea: String(fd.get("ninea") ?? ""),
-      contactName: String(fd.get("contactName") ?? ""),
-      phone: String(fd.get("phone") ?? ""),
-      email: String(fd.get("email") ?? ""),
-      message,
-    });
+    const res = await submitQuoteRequestAction(
+      {
+        companyName: String(fd.get("companyName") ?? ""),
+        ninea: String(fd.get("ninea") ?? ""),
+        contactName: String(fd.get("contactName") ?? ""),
+        phone: String(fd.get("phone") ?? ""),
+        email: String(fd.get("email") ?? ""),
+        message: String(fd.get("message") ?? ""),
+      },
+      items,
+    );
 
     setPending(false);
-    if (res.ok) {
-      setDone(true);
+    if (res.ok && res.quoteId) {
+      setQuoteId(res.quoteId);
     } else {
       setError(res.error ?? "Une erreur est survenue.");
     }
   }
 
-  if (done) {
+  if (quoteId) {
     return (
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-4 px-4 py-32 text-center">
         <CheckCircle2 className="h-12 w-12 text-[hsl(var(--accent))]" />
@@ -74,6 +76,15 @@ export default function DevisPage() {
           Merci, votre demande de devis a bien été enregistrée. Notre équipe
           vous contactera rapidement pour établir votre offre.
         </p>
+        <a
+          href={`/api/proforma/quote/${quoteId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 inline-flex h-11 items-center gap-2 rounded-full bg-[hsl(var(--accent))] px-6 text-sm font-medium text-[hsl(var(--accent-foreground))] transition-opacity hover:opacity-90"
+        >
+          <Download className="h-4 w-4" />
+          Télécharger le devis (PDF)
+        </a>
       </div>
     );
   }

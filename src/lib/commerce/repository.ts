@@ -80,12 +80,14 @@ function rowToOrder(r: OrderRow): Order {
 function rowToQuoteRequest(r: QuoteRequestRow): QuoteRequest {
   return {
     id: r.id,
+    quoteNumber: r.quoteNumber,
     companyName: r.companyName,
     ninea: r.ninea,
     contactName: r.contactName,
     phone: r.phone,
     email: r.email,
     message: r.message,
+    items: r.items,
     status: r.status,
     createdAt: r.createdAt.toISOString(),
   };
@@ -310,6 +312,7 @@ export async function createQuoteRequest(input: {
   phone: string;
   email: string | null;
   message: string;
+  items: OrderItem[];
 }): Promise<QuoteRequest | null> {
   const db = getDb();
   if (!db) return null;
@@ -317,6 +320,17 @@ export async function createQuoteRequest(input: {
     .insert(quoteRequests)
     .values({ ...input, tenantId: TENANT, status: "new" })
     .returning();
+  return row ? rowToQuoteRequest(row) : null;
+}
+
+export async function getQuoteRequestById(id: string): Promise<QuoteRequest | null> {
+  const db = getDb();
+  if (!db) return null;
+  const [row] = await db
+    .select()
+    .from(quoteRequests)
+    .where(eq(quoteRequests.id, id))
+    .limit(1);
   return row ? rowToQuoteRequest(row) : null;
 }
 
