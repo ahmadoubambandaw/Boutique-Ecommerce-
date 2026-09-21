@@ -1,15 +1,35 @@
 "use client";
 
 import * as React from "react";
-import { Building2, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { Building2, CheckCircle2, PackageSearch } from "lucide-react";
 import { Input, Textarea } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/lib/store/cart";
 import { submitQuoteRequestAction } from "@/lib/actions/quote";
 
 export default function DevisPage() {
+  const { lines } = useCart();
+  const [selected, setSelected] = React.useState<Record<string, boolean>>({});
   const [pending, setPending] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [done, setDone] = React.useState(false);
+
+  // Select every cart item by default the first time the cart is read
+  // (client-side store hydrates after mount, so this can't be initial state).
+  const initialized = React.useRef(false);
+  React.useEffect(() => {
+    if (initialized.current || lines.length === 0) return;
+    initialized.current = true;
+    setSelected(Object.fromEntries(lines.map((l) => [l.variantId, true])));
+  }, [lines]);
+
+  function toggle(variantId: string) {
+    setSelected((s) => ({ ...s, [variantId]: !s[variantId] }));
+  }
+
+  const selectedLines = lines.filter((l) => selected[l.variantId]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -17,13 +37,24 @@ export default function DevisPage() {
     setPending(true);
     const fd = new FormData(e.currentTarget);
 
+    const productsList = selectedLines
+      .map((l) => `- ${l.title}${l.variantTitle !== "Default Title" ? ` (${l.variantTitle})` : ""} × ${l.quantity}`)
+      .join("\n");
+    const note = String(fd.get("message") ?? "").trim();
+    const message = [
+      productsList && `Produits souhaités :\n${productsList}`,
+      note,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+
     const res = await submitQuoteRequestAction({
       companyName: String(fd.get("companyName") ?? ""),
       ninea: String(fd.get("ninea") ?? ""),
       contactName: String(fd.get("contactName") ?? ""),
       phone: String(fd.get("phone") ?? ""),
       email: String(fd.get("email") ?? ""),
-      message: String(fd.get("message") ?? ""),
+      message,
     });
 
     setPending(false);
@@ -61,6 +92,52 @@ export default function DevisPage() {
       </div>
 
       <form onSubmit={onSubmit} className="space-y-4">
+        <section>
+          <div className="mb-2 flex items-center justify-between">
+            <label className="text-sm font-medium">Produits souhaités</label>
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-1 text-xs text-[hsl(var(--accent))] hover:underline"
+            >
+              <PackageSearch className="h-3.5 w-3.5" />
+              Parcourir le catalogue
+            </Link>
+          </div>
+
+          {lines.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-[hsl(var(--border))] p-4 text-sm text-[hsl(var(--muted-foreground))]">
+              Ajoutez des produits à votre panier en parcourant le catalogue —
+              ils apparaîtront ici automatiquement, prêts à être inclus dans
+              votre demande. Vous pouvez aussi décrire votre besoin librement
+              ci-dessous.
+            </div>
+          ) : (
+            <ul className="divide-y divide-[hsl(var(--border))] rounded-2xl border border-[hsl(var(--border))]">
+              {lines.map((l) => (
+                <li key={l.variantId} className="flex items-center gap-3 p-3">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(selected[l.variantId])}
+                    onChange={() => toggle(l.variantId)}
+                    className="h-4 w-4 shrink-0 accent-[hsl(var(--accent))]"
+                  />
+                  <div className="relative h-12 w-10 shrink-0 overflow-hidden rounded-lg bg-[hsl(var(--muted))]">
+                    {l.image && (
+                      <Image src={l.image} alt={l.title} fill sizes="40px" className="object-cover" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{l.title}</p>
+                    <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                      {l.variantTitle} × {l.quantity}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
         <div>
           <label className="mb-1.5 block text-sm font-medium">
             Nom de l&apos;entreprise
@@ -89,12 +166,12 @@ export default function DevisPage() {
         </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium">
-            Votre besoin (optionnel)
+            Précisions supplémentaires (optionnel)
           </label>
           <Textarea
             name="message"
-            className="min-h-28"
-            placeholder="Équipements souhaités, quantités, délai…"
+            className="min-h-24"
+            placeholder="Quantités, délai souhaité, autres besoins…"
           />
         </div>
 

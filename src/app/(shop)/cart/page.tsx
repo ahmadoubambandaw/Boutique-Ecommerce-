@@ -156,6 +156,12 @@ export default function CartPage() {
           <Button className="mt-4 w-full" size="lg" onClick={checkout}>
             Passer commande
           </Button>
+          <Link
+            href="/devis"
+            className="mt-2 flex h-11 w-full items-center justify-center rounded-full border border-[hsl(var(--border))] text-sm font-medium hover:bg-[hsl(var(--muted))]"
+          >
+            Demander un devis (entreprises)
+          </Link>
         </aside>
       </div>
     </div>
