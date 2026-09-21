@@ -14,6 +14,7 @@ import { useWishlist } from "@/lib/store/wishlist";
 import { useCompare } from "@/lib/store/compare";
 import { useRecentlyViewed } from "@/lib/store/recently-viewed";
 import { toast } from "@/lib/store/toast";
+import { VariantQuickOrder } from "@/components/product/variant-quick-order";
 
 function matchVariant(
   product: Product,
@@ -225,6 +226,8 @@ export function ProductBuyBox({ product }: { product: Product }) {
       >
         Acheter maintenant
       </Button>
+
+      <VariantQuickOrder product={product} />
 
       {/* Secondary actions */}
       <div className="flex items-center gap-4 text-sm">
