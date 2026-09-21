@@ -4,6 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, Check, ShieldCheck } from "lucide-react";
+import type { Product } from "@/lib/shopify/types";
+import { formatPrice } from "@/lib/utils";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -13,7 +15,22 @@ const FEATURES = [
   "Semelle antidérapante",
 ];
 
-export function Hero({ tagline }: { tagline: string }) {
+const FALLBACK_IMAGE =
+  "https://cdktjngwukkeededkvji.supabase.co/storage/v1/object/public/product-images/gse-upload/chaussures-de-securite-light-bearer-noir.png";
+
+export function Hero({
+  tagline,
+  featuredProduct,
+}: {
+  tagline: string;
+  /** Sourced from the real catalogue so admin price/title edits show up here automatically. */
+  featuredProduct?: Product | null;
+}) {
+  const image =
+    featuredProduct?.featuredImage?.url ?? FALLBACK_IMAGE;
+  const title = featuredProduct?.title ?? "Chaussures de sécurité Light Bearer noir";
+  const price = featuredProduct?.priceRange.minVariantPrice;
+  const href = featuredProduct ? `/products/${featuredProduct.handle}` : "/products";
   return (
     <section className="relative overflow-hidden bg-white">
       <div className="mx-auto grid min-h-[88vh] w-full max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 md:grid-cols-2 lg:grid-cols-[1fr_1.15fr_1fr] lg:gap-6 lg:px-8">
@@ -74,8 +91,8 @@ export function Hero({ tagline }: { tagline: string }) {
                 style={{ transformPerspective: 1000 }}
               >
                 <Image
-                  src="https://cdktjngwukkeededkvji.supabase.co/storage/v1/object/public/product-images/gse-upload/chaussures-de-securite-light-bearer-noir.png"
-                  alt="Chaussures de sécurité Light Bearer noir — GSE"
+                  src={image}
+                  alt={`${title} — GSE`}
                   width={329}
                   height={472}
                   priority
@@ -90,7 +107,7 @@ export function Hero({ tagline }: { tagline: string }) {
               className="pointer-events-none mx-auto -mt-1 h-16 w-[62vw] max-w-[300px] overflow-hidden opacity-15 lg:max-w-[380px] [mask-image:linear-gradient(to_bottom,black,transparent_80%)]"
             >
               <Image
-                src="https://cdktjngwukkeededkvji.supabase.co/storage/v1/object/public/product-images/gse-upload/chaussures-de-securite-light-bearer-noir.png"
+                src={image}
                 alt=""
                 width={329}
                 height={472}
@@ -115,7 +132,7 @@ export function Hero({ tagline }: { tagline: string }) {
               À la une
             </p>
             <h2 className="mt-2 text-2xl font-bold text-[hsl(214_60%_14%)]">
-              Chaussures de sécurité Light Bearer noir
+              {title}
             </h2>
             <p className="mt-1 text-sm font-medium text-[hsl(214_18%_45%)]">
               Norme EN ISO 20345
@@ -134,10 +151,10 @@ export function Hero({ tagline }: { tagline: string }) {
               À partir de
             </p>
             <p className="text-2xl font-bold text-[hsl(214_60%_14%)]">
-              15 000 FCFA
+              {price ? formatPrice(price.amount, price.currencyCode) : "9 990 FCFA"}
             </p>
             <Link
-              href="/products/chaussures-de-securite-light-bearer-noir"
+              href={href}
               className="group mt-5 inline-flex items-center gap-2 rounded-full border border-[hsl(214_30%_80%)] px-6 py-3 text-sm font-semibold text-[hsl(214_60%_14%)] transition-colors hover:border-[hsl(var(--accent))] hover:bg-[hsl(214_40%_97%)]"
             >
               Voir le produit
